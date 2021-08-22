@@ -1,18 +1,20 @@
 QUIZ = {
-    "Where is Accommodation service located?": (1, ["3-101", "3-100", "3-200", "3-102"]),
-    "What do you do when a fire alarm is triggered by cooking?": (0, ["Run to security and call off the call",
-                                                                      "Continue to prepare",
-                                                                      "Write in Q&A bot and ask what to do",
-                                                                      "Write in Q&A bot and ask what to do"]),
-    " How much is a firefighter getting on call?": (0, ["3000 rub", "1500 rub", "500 rub", "4500 rub"]),
-    "How many bottles can I take from the warehouse?": (2, [1, 4, 1, 3]),
-    "Where do I write about the internet in the room?": (0,
-                                                         ["it@innopolis.ru", "2. it@innopolis.university",
-                                                          "3. it@innopolis.accommodation", "it@innopolis.com"]),
-    "Where is the tennis cord located?": (0, ["Between the football field and the hockey field",
-                                              "Between the football field and the Sport complex",
-                                              "Between the forest and the hockey field",
-                                              "Between the 'Пятёрочка' and the 'Магнит-Косметик'"]),
+    "Where is Accommodation service located?": ("3-100", ["3-101", "3-100", "3-200", "3-102"]),
+    "What do you do when a fire alarm is triggered by cooking?": (
+        "Run to security and call off the call", ["Run to security and call off the call",
+                                                  "Continue to prepare",
+                                                  "Write in Q&A bot and ask what to do",
+                                                  "Write in Q&A bot and ask what to do"]),
+    " How much is a firefighter getting on call?": ("3000 rub", ["3000 rub", "1500 rub", "500 rub", "4500 rub"]),
+    "How many bottles can I take from the warehouse?": ('1', ['1', '4', '2', '3']),
+    "Where do I write about the internet in the room?": ("it@innopolis.ru",
+                                                         ["it@innopolis.ru", "it@innopolis.university",
+                                                          "it@innopolis.accommodation", "it@innopolis.com"]),
+    "Where is the tennis cord located?": (
+        "Between the football field and the hockey field", ["Between the football field and the hockey field",
+                                                            "Between the football field and the Sport complex",
+                                                            "Between the forest and the hockey field",
+                                                            "Between the 'Пятёрочка' and the 'Магнит-Косметик'"]),
     "Where is 'Пятерочка' located?": (
         0, ["Sportivnaya St, 126", "Kazanskay St, 120", "Sportivnaya St, 120", "Kazanskay St, 126"]),
     "Where to place the BBQ?": (2, ["Near University", "Near Sport Complex", "In the Park", "It doesn't exist"]),
@@ -20,16 +22,18 @@ QUIZ = {
     "Where is the post 'OZON BOX' located?": (0, ["Sportivnaya St, 134 and at the University", "Only at the University",
                                                   "Only on Sportivnaya St, 134", "Nowhere"]),
     "Where is Section 319 located?": (
-        0,
-        ["Cab 319 in University", "Room 1-319 in Dorm", "3. University St, House 319", "3. University St, House 319"]),
-    "How to book Meeting Room?": (0, ["Add meeting in University calendar", "Ask to Section 319 to book room",
-                                      "Write in chat, that you book meeting room", "No way"]),
-    "How many ReTakes do you have after a failed exam?": (2, [0, 1, 2, 3]),
+        "Cab 319 in University",
+        ["Cab 319 in University", "Room 1-319 in Dorm", "University St, House 319",
+         "It doesn't have room, it's only chat"]),
+    "How to book Meeting Room?": (
+        "Add meeting in University calendar", ["Add meeting in University calendar", "Ask to Section 319 to book room",
+                                               "Write in chat, that you book meeting room", "No way"]),
+    "How many ReTakes do you have after a failed exam?": ("2", ['0', '1', '2', '3']),
     "What can be used as CheetSheets in the exam?": (
-        0, ["Your writings", "Printed materials", "Mobile Phone", "Studentbook"]),
-    "Where can you see your class schedule?": (0, ["Moodle", "Google calendar", "University calendar", "No way"]),
-    "How much is dinner in the cafeteria with a student’s card?": (1, [195, 145, 190, 200]),
+        "Your writings", ["Your writings", "Printed materials", "Mobile Phone", "Studentbook"]),
+    "Where can you see your class schedule?": (
+        "Moodle", ["Moodle", "Google calendar", "University calendar", "No way"]),
+    "How much is dinner in the cafeteria with a student’s card?": ('145', ['195', '145', '190', '200']),
     "What does the student card machine say in the dining room?": (
-        0, ["Bon Appetit", "Приятного аппетита", "Buen provecho", "good appetit"]),
-
+        "Bon Appetit", ["Bon Appetit", "Приятного аппетита", "Buen provecho", "good appetit"])
 }
