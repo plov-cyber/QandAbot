@@ -16,11 +16,16 @@ QUIZ = {
                                                             "Between the forest and the hockey field",
                                                             "Between the 'Пятёрочка' and the 'Магнит-Косметик'"]),
     "Where is 'Пятерочка' located?": (
-        0, ["Sportivnaya St, 126", "Kazanskay St, 120", "Sportivnaya St, 120", "Kazanskay St, 126"]),
-    "Where to place the BBQ?": (2, ["Near University", "Near Sport Complex", "In the Park", "It doesn't exist"]),
-    "Where can I smoke in the city?": (2, ["Anywhere", "On bus stations", "In smoke-rooms", "In University"]),
-    "Where is the post 'OZON BOX' located?": (0, ["Sportivnaya St, 134 and at the University", "Only at the University",
-                                                  "Only on Sportivnaya St, 134", "Nowhere"]),
+        "Sportivnaya St, 126",
+        ["Sportivnaya St, 126", "Kazanskay St, 120", "Sportivnaya St, 120", "Kazanskay St, 126"]),
+    "Where to place the BBQ?": (
+        "In the Park", ["Near University", "Near Sport Complex", "In the Park", "It doesn't exist"]),
+    "Where can I smoke in the city?": (
+        "In smoke-rooms", ["Anywhere", "On bus stations", "In smoke-rooms", "In University"]),
+    "Where is the post 'OZON BOX' located?": (
+        "Sportivnaya St, 134 and at the University",
+        ["Sportivnaya St, 134 and at the University", "Only at the University",
+         "Only on Sportivnaya St, 134", "Nowhere"]),
     "Where is Section 319 located?": (
         "Cab 319 in University",
         ["Cab 319 in University", "Room 1-319 in Dorm", "University St, House 319",
