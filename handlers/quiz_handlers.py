@@ -20,7 +20,8 @@ async def reply_on_quiz(message: types.Message, state: FSMContext):
     text = message.text
     if text == "Skip the test":
         await state.finish()
-        keyboard_for_questions = types.ReplyKeyboardMarkup(resize_keyboard=True)
+
+        keyboard_for_questions = types.ReplyKeyboardMarkup(one_time_keyboard=True,resize_keyboard=True)
         buttons = [
             types.KeyboardButton(text="Find solution"),
             types.KeyboardButton(text="Ask a question")

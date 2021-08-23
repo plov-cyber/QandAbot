@@ -6,7 +6,7 @@ QUIZ = {
         "Run to security and call off the call", ["Run to security and call off the call",
                                                   "Continue to prepare",
                                                   "Write in Q&A bot and ask what to do",
-                                                  "Write in Q&A bot and ask what to do"]),
+                                                  "call to Semenihen"]),
     " How much is a firefighter getting on call?": ("3000 rub", ["3000 rub", "1500 rub", "500 rub", "4500 rub"]),
     "How many bottles can I take from the warehouse?": ('1', ['1', '4', '2', '3']),
     "Where do I write about the internet in the room?": ("it@innopolis.ru",
@@ -14,7 +14,8 @@ QUIZ = {
                                                           "it@innopolis.accommodation", "it@innopolis.com"]),
     "Where is the tennis cord located?": (
         "Between the football field and the hockey field", ["Between the football field and the hockey field",
-                                                            "Between the football field and the Sport complex",
+                                                            "Between the football field a"
+                                                            "nd the Sport complex",
                                                             "Between the forest and the hockey field",
                                                             "Between the 'Пятёрочка' and the 'Магнит-Косметик'"]),
     "Where is 'Пятерочка' located?": (
