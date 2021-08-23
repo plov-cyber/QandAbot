@@ -20,12 +20,6 @@ async def reply_on_quiz(message: types.Message, state: FSMContext):
     text = message.text
     if text == "Skip the test":
         await state.finish()
-        keyboard_for_questions = types.ReplyKeyboardMarkup(resize_keyboard=True)
-        buttons = [
-            types.KeyboardButton(text="Find solution"),
-            types.KeyboardButton(text="Ask a question")
-        ]
-        keyboard_for_questions.add(*buttons)
         await message.answer(text=f"-How to use Q&A Bot?\n"
                                   f"-It's so easy in using:\n"
                                   f"1. If you want to find a question in data base:\n"
@@ -35,9 +29,7 @@ async def reply_on_quiz(message: types.Message, state: FSMContext):
                                   f"2. If you want to create your question:\n"
                                   f"    You need to send the question\n"
                                   f"    After, send all #Hashtags in one message\n"
-                                  f"    Next, you need only wait...", reply_markup=keyboard_for_questions)
-
-
+                                  f"    Next, you need only wait...", reply_markup=types.ReplyKeyboardRemove())
     elif text == "Give me this test!":
         await state.finish()
         quests = list(QUIZ.keys())
