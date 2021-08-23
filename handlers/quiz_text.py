@@ -42,5 +42,11 @@ QUIZ = {
         "Moodle", ["Moodle", "Google calendar", "University calendar", "No way"]),
     "How much is dinner in the cafeteria with a student’s card?": ('145', ['195', '145', '190', '200']),
     "What does the student card machine say in the dining room?": (
-        "Bon Appetit", ["Bon Appetit", "Приятного аппетита", "Buen provecho", "good appetit"])
+        "Bon Appetit", ["Bon Appetit", "Приятного аппетита", "Buen provecho", "good appetit"]),
+    "What time does the Mayor run around on Sunday?": ("9:00", ["9:30", "9:00", "8:30", "10:00"]),
+    "Where to find the events that will be on ArtSpace?": (
+    "ArtSpace events", ["ArtSpace events", "ArtSpace", "ArtSpace Events", "ArtSpaceEvents"]),
+    "What is it 'Rage' in Innopolis?": ("Club of Russian Ancient Games & Entertainments",
+                                        ["Football team", "Club of Russian Ancient Games & Entertainments",
+                                         "Innopolis system", "Shop in Innopolis"])
 }
