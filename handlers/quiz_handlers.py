@@ -12,7 +12,16 @@ quiz_dict = {}
 async def reply_on_quiz(message: types.Message):
     text = message.text
     if text == "Skip the test":
-        pass
+        await message.answer(text=f"-How to use Q&A Bot?\n"
+                                  f"-It's so easy in using:\n"
+                                  f"1. If you want to find a question in data base:\n"
+                                  f"    You need to send #Hashtags, which describe your question 🙋 \n"
+                                  f"    After, you get some questions with the same #Hashtags \n"
+                                  f"    Next, you can flip questions over by ⬅️➡️\n"
+                                  f"2. If you want to create your question:\n"
+                                  f"    You need to send the question\n"
+                                  f"    After, send all #Hashtags in one message\n"
+                                  f"    Next, you need only wait...")
     elif text == "Give me this test!":
         await QuizStates.next()
         quests = list(QUIZ.keys())

@@ -40,6 +40,11 @@ async def cmd_start(message: types.Message, state: FSMContext):
 
 
 async def cmd_help(message: types.Message, state: FSMContext):
+    await message.answer(text=f"It’s an up-to-date Bot with a database of questions that were answered with competent "
+                              f"answers. You always can contact developer:\n"
+                              f"📩: l.rekhlov@innopolis.university\n"
+                              f"📩: s.kamalov@innopolis.university\n"
+                              f"telegram: @RRMOLL\n")
     await state.finish()
 
 
