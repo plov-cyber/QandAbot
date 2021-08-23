@@ -1,3 +1,6 @@
+"""File with database creation."""
+
+# Libraries, classes and functions imports
 import sqlalchemy as sa
 import sqlalchemy.orm as orm
 from sqlalchemy.orm import Session
@@ -9,6 +12,8 @@ __factory = None
 
 
 def global_init(db_file):
+    """Initializes sqlite database with engine and factory."""
+
     global __factory
 
     if __factory:
@@ -28,5 +33,7 @@ def global_init(db_file):
 
 
 def create_session() -> Session:
+    """Creates session."""
+
     global __factory
     return __factory()

@@ -1,3 +1,5 @@
+"""File with all questions for quiz."""
+
 QUIZ = {
     "Where is Accommodation service located?": ("3-100", ["3-101", "3-100", "3-200", "3-102"]),
     "What do you do when a fire alarm is triggered by cooking?": (

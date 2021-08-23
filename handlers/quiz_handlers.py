@@ -1,17 +1,25 @@
+"""Quiz handlers."""
+
+# Libraries, classes and functions imports
 import asyncio
 from random import shuffle
 
 from aiogram import Dispatcher, types
+from aiogram.dispatcher import FSMContext
 
 from handlers.quiz_text import QUIZ
-from handlers.states import QuizStates, RespondentStates
+from handlers.states import RespondentStates, QuizStates
 
+# Dictionary with all users.
 quiz_dict = {}
 
 
-async def reply_on_quiz(message: types.Message):
+async def reply_on_quiz(message: types.Message, state: FSMContext):
+    """Different replies before quiz."""
+
     text = message.text
     if text == "Skip the test":
+        await state.finish()
         await message.answer(text=f"-How to use Q&A Bot?\n"
                                   f"-It's so easy in using:\n"
                                   f"1. If you want to find a question in data base:\n"
@@ -21,9 +29,9 @@ async def reply_on_quiz(message: types.Message):
                                   f"2. If you want to create your question:\n"
                                   f"    You need to send the question\n"
                                   f"    After, send all #Hashtags in one message\n"
-                                  f"    Next, you need only wait...",reply_markup=types.ReplyKeyboardRemove())
+                                  f"    Next, you need only wait...", reply_markup=types.ReplyKeyboardRemove())
     elif text == "Give me this test!":
-        await QuizStates.next()
+        await state.finish()
         quests = list(QUIZ.keys())
         shuffle(quests)
         quiz_dict[message.from_user.id] = {
@@ -37,6 +45,8 @@ async def reply_on_quiz(message: types.Message):
 
 
 async def passing_quiz(message: types.Message):
+    """Function sending the quiz."""
+
     data = quiz_dict[message.from_user.id]
     if data["num"] == -1:
         await message.answer(text="Test will start in", reply_markup=types.ReplyKeyboardRemove())
@@ -52,7 +62,7 @@ async def passing_quiz(message: types.Message):
     options = QUIZ[p_quests[i]]
     shuffle(options[1])
     now_question = await message.answer_poll(question=p_quests[i], options=options[1], is_anonymous=False,
-                                             type="quiz", open_period=15,
+                                             type="quiz", open_period=10,
                                              allows_multiple_answers=False,
                                              correct_option_id=options[1].index(options[0]))
     quiz_dict[message.from_user.id]["poll"] = now_question
@@ -91,12 +101,16 @@ async def passing_quiz(message: types.Message):
             await RespondentStates.wait_for_reply.set()
         else:
             pass  # доделать
+
+        quiz_dict.pop(message.from_user.id)
         return
 
     await passing_quiz(message)
 
 
 async def getting_quiz_answer(poll_answer: types.PollAnswer):
+    """Counting user's right answers."""
+
     quiz_dict[poll_answer.user.id]["poll"].poll.is_closed = True
 
     right_answer = quiz_dict[poll_answer.user.id]["poll"].poll.correct_option_id
@@ -106,5 +120,7 @@ async def getting_quiz_answer(poll_answer: types.PollAnswer):
 
 
 def register_quiz_handlers(dp: Dispatcher):
+    """Registers all quiz_handlers to dispatcher."""
+
     dp.register_message_handler(reply_on_quiz, state=QuizStates.wait_for_reply)
     dp.register_poll_answer_handler(getting_quiz_answer)

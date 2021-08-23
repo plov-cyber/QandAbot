@@ -1,12 +1,16 @@
+"""All states needed for Finite-State Machine."""
+
+# Imports
 from aiogram.dispatcher.filters.state import State, StatesGroup
 
 
-# Quiz
 class QuizStates(StatesGroup):
+    """Quiz states."""
+
     wait_for_reply = State()
-    quiz = State()
 
 
-# Become a respondent
 class RespondentStates(StatesGroup):
+    """Respondent states."""
+
     wait_for_reply = State()

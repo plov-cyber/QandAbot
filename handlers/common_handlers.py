@@ -1,3 +1,6 @@
+"""Common handlers."""
+
+# Libraries, classes and functions imports
 import requests
 from aiogram import types, Dispatcher
 from aiogram.dispatcher import FSMContext
@@ -7,6 +10,7 @@ from data import db_session
 from data.UserModel import User
 from handlers.states import QuizStates
 
+# Keyboard asking about passing quiz.
 keyboard_for_quiz = types.ReplyKeyboardMarkup(resize_keyboard=True)
 buttons = [
     types.KeyboardButton(text="Give me this test!"),
@@ -16,11 +20,13 @@ keyboard_for_quiz.add(*buttons)
 
 
 async def cmd_start(message: types.Message, state: FSMContext):
+    """Function triggers on /start."""
+
     await state.finish()
-    session = db_session.create_session()
-    user = session.query(User).get(message.from_user.id)
-    if user:
-        if user.is_specialist:
+    user = requests.get(f'http://localhost:{PORT}/api_users/{message.from_user.id}').json()
+    if 'user' in user:
+        user = user['user']
+        if user['is_respondent']:
             pass
     else:
         requests.post(f'http://localhost:{PORT}/api_users', json={
@@ -40,14 +46,18 @@ async def cmd_start(message: types.Message, state: FSMContext):
 
 
 async def cmd_help(message: types.Message, state: FSMContext):
-    await message.answer(text=f"It’s an up-to-date Bot with a database of questions that were answered with competent "
-                              f"answers. You always can contact developer:\n"
-                              f"📩: l.rekhlov@innopolis.university\n"
-                              f"📩: s.kamalov@innopolis.university\n"
-                              f"telegram: @RRMOLL\n")
+    """Function triggers on /help."""
+
     await state.finish()
+    await message.answer(text="It’s an up-to-date Bot with a database of questions that were answered with competent "
+                              "answers. You always can contact developer:\n"
+                              "📩: l.rekhlov@innopolis.university\n"
+                              "📩: s.kamalov@innopolis.university\n"
+                              "telegram: @RRMOLL\n")
 
 
 def register_common_handlers(dp: Dispatcher):
+    """Registers all common_handlers to dispatcher."""
+
     dp.register_message_handler(cmd_start, commands='start', state="*")
     dp.register_message_handler(cmd_help, commands='help', state='*')
