@@ -21,7 +21,7 @@ async def reply_on_quiz(message: types.Message):
                                   f"2. If you want to create your question:\n"
                                   f"    You need to send the question\n"
                                   f"    After, send all #Hashtags in one message\n"
-                                  f"    Next, you need only wait...")
+                                  f"    Next, you need only wait...",reply_markup=types.ReplyKeyboardRemove())
     elif text == "Give me this test!":
         await QuizStates.next()
         quests = list(QUIZ.keys())
