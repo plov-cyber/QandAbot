@@ -2,6 +2,7 @@
 
 # Libraries, classes and functions imports
 import asyncio
+from time import time
 from random import shuffle
 
 import requests
@@ -67,8 +68,9 @@ async def passing_quiz(message: types.Message):
                                              correct_option_id=options[1].index(options[0]))
     quiz_dict[message.from_user.id]["poll"] = now_question
     data["num"] += 1
+    start_time = time()
 
-    while not now_question.poll.is_closed:
+    while not now_question.poll.is_closed and time() - start_time < 10:
         await asyncio.sleep(0.1)
 
     if data["num"] == 20:

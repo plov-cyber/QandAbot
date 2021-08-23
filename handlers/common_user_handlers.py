@@ -1,9 +1,14 @@
 """Common User handlers."""
 
 # Libraries, classes and functions imports
+import requests
 from aiogram import types, Dispatcher
+from aiogram.dispatcher import FSMContext
 
-from handlers.states import CommonUserStates
+from api import PORT
+from handlers.common_handlers import keyboard_for_quiz
+from handlers.quiz_handlers import ok_keyboard
+from handlers.states import CommonUserStates, QuizStates, RespondentStates
 
 
 async def common_user_send_actions(message: types.Message):
@@ -27,9 +32,47 @@ async def common_user_send_actions(message: types.Message):
                               f"    You need to send the question\n"
                               f"    After, send all #Hashtags in one message\n"
                               f"    Next, you need only wait...", reply_markup=keyboard_for_questions)
+    await CommonUserStates.next()
+
+
+async def react_to_actions(message: types.Message, state: FSMContext):
+    """Different reactions to actions."""
+
+    text = message.text
+    if text == "Become respondent":
+        user = requests.get(f"http://localhost:{PORT}/api_users/{message.from_user.id}").json()
+        if "message" in user:
+            await message.answer(text=user["message"], reply_markup=types.ReplyKeyboardRemove())
+            await state.finish()
+        else:
+            user = user['user']
+            stat = user['is_respondent']
+            responses = ["To become a respondent you should pass the test.",
+                         "To become a respondent you should take the test again."]
+            if stat in [0, 1]:
+                await message.answer(text=responses[stat],
+                                     reply_markup=keyboard_for_quiz)
+                await QuizStates.wait_for_reply.set()
+            elif stat == 2:
+                res = requests.put(f"http://localhost:{PORT}/api_users/{message.from_user.id}", json={
+                    'is_respondent': 3
+                }).json()
+                if 'success' in res:
+                    await message.answer(text="You already passed the test and can start answering the questions.",
+                                         reply_markup=ok_keyboard)
+                    await RespondentStates.send_actions.set()
+                else:
+                    await message.answer(text=f"Can't set is_respondent 3 for @{message.from_user.username} :(",
+                                         reply_markup=types.ReplyKeyboardRemove())
+                    await state.finish()
+    elif text == "Ask question":
+        pass
+    elif text == "Find question":
+        pass
 
 
 def register_common_user_handlers(dp: Dispatcher):
     """Registers all common_user_handlers to dispatcher."""
 
     dp.register_message_handler(common_user_send_actions, state=CommonUserStates.send_actions)
+    dp.register_message_handler(react_to_actions, state=CommonUserStates.react_to_actions)

@@ -2,7 +2,6 @@
 
 # Libraries, classes and functions imports
 import logging
-import os
 
 from aiogram import Bot, Dispatcher, executor
 from aiogram.contrib.fsm_storage.memory import MemoryStorage

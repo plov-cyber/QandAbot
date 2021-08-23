@@ -21,3 +21,4 @@ class CommonUserStates(StatesGroup):
     """States for simple user."""
 
     send_actions = State()
+    react_to_actions = State()
