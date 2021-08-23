@@ -11,7 +11,7 @@ from data.UserModel import User
 from handlers.states import QuizStates
 
 # Keyboard asking about passing quiz.
-keyboard_for_quiz = types.ReplyKeyboardMarkup(resize_keyboard=True)
+keyboard_for_quiz = types.ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True)
 buttons = [
     types.KeyboardButton(text="Give me this test!"),
     types.KeyboardButton(text="Skip the test")
@@ -24,16 +24,17 @@ async def cmd_start(message: types.Message, state: FSMContext):
 
     await state.finish()
     user = requests.get(f'http://localhost:{PORT}/api_users/{message.from_user.id}').json()
-    if 'user' in user:
+    if 'message' not in user:
         user = user['user']
-        if user['is_respondent']:
+        await message.answer(text="There is nothing here yet. :(")
+        if user['is_respondent'] == 2:
             pass
     else:
         requests.post(f'http://localhost:{PORT}/api_users', json={
             'id': message.from_user.id,
             'username': message.from_user.username,
             'first_name': message.from_user.first_name,
-            'last_name': message.from_user.last_name
+            'last_name': message.from_user.last_name if message.from_user.last_name else ""
         }).json()
         user_name = message.from_user.first_name + ' ' + message.from_user.last_name \
             if message.from_user.last_name else message.from_user.first_name
@@ -53,7 +54,7 @@ async def cmd_help(message: types.Message, state: FSMContext):
                               "answers. You always can contact developer:\n"
                               "📩: l.rekhlov@innopolis.university\n"
                               "📩: s.kamalov@innopolis.university\n"
-                              "telegram: @RRMOLL\n")
+                              "telegram: @RRMOLL\n", reply_markup=types.ReplyKeyboardRemove())
 
 
 def register_common_handlers(dp: Dispatcher):

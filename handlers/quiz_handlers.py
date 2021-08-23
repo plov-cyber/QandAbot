@@ -79,8 +79,8 @@ async def passing_quiz(message: types.Message):
     while not now_question.poll.is_closed:
         await asyncio.sleep(0.1)
 
-    if data["num"] == 17:  # исправить
-        data["result"] = int(100 * (data["result"] / 17))
+    if data["num"] == 20:  # исправить
+        data["result"] = int(100 * (data["result"] / 20))
         await message.answer(text=f"My congratulations, you know Innopolis on {data['result']}%")
 
         if data["result"] >= 40:
@@ -108,7 +108,7 @@ async def passing_quiz(message: types.Message):
                                  parse_mode="HTML", reply_markup=keyboard)
             await RespondentStates.wait_for_reply.set()
         else:
-            pass  # доделать
+            pass
 
         quiz_dict.pop(message.from_user.id)
         return

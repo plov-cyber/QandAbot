@@ -8,10 +8,11 @@ from data.UserModel import User
 
 # Arguments parser
 parser = reqparse.RequestParser()
-parser.add_argument('id', type=int, required=True)
-parser.add_argument('username', type=str, required=True)
-parser.add_argument('first_name', type=str, required=True)
+parser.add_argument('id', type=int)
+parser.add_argument('username', type=str)
+parser.add_argument('first_name', type=str)
 parser.add_argument('last_name', type=str)
+parser.add_argument('is_respondent', type=int)
 
 
 def abort_if_user_not_found(user_id):
@@ -24,7 +25,7 @@ def abort_if_user_not_found(user_id):
 
 
 class UserResource(Resource):
-    """Resource to get and delete user, change user's data."""  # add another later
+    """Resource to get and delete user, change user's data."""
 
     def get(self, user_id):
         """Get single user."""
