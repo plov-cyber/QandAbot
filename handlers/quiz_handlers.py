@@ -4,14 +4,21 @@
 import asyncio
 from random import shuffle
 
+import requests
 from aiogram import Dispatcher, types
 from aiogram.dispatcher import FSMContext
 
+from api import PORT
 from handlers.quiz_text import QUIZ
-from handlers.states import RespondentStates, QuizStates
+from handlers.states import RespondentStates, QuizStates, CommonUserStates
 
 # Dictionary with all users.
 quiz_dict = {}
+
+ok_keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True,
+                                        keyboard=[[
+                                            types.KeyboardButton(text="OK")
+                                        ]])
 
 
 async def reply_on_quiz(message: types.Message, state: FSMContext):
@@ -20,25 +27,9 @@ async def reply_on_quiz(message: types.Message, state: FSMContext):
     text = message.text
     if text == "Skip the test":
         await state.finish()
-
-        keyboard_for_questions = types.ReplyKeyboardMarkup(one_time_keyboard=True,resize_keyboard=True)
-        buttons = [
-            types.KeyboardButton(text="Find solution"),
-            types.KeyboardButton(text="Ask a question")
-        ]
-        keyboard_for_questions.add(*buttons)
-        await message.answer(text=f"-How to use Q&A Bot?\n"
-                                  f"-It's so easy in using:\n"
-                                  f"1. If you want to find a question in data base:\n"
-                                  f"    You need to send #Hashtags, which describe your question 🙋 \n"
-                                  f"    After, you get some questions with the same #Hashtags \n"
-                                  f"    Next, you can flip questions over by ⬅️➡️\n"
-                                  f"2. If you want to create your question:\n"
-                                  f"    You need to send the question\n"
-                                  f"    After, send all #Hashtags in one message\n"
-                                  f"    Next, you need only wait...", reply_markup=keyboard_for_questions)
-
-
+        await message.answer(text="You can always return to the test to be able to answer questions.",
+                             reply_markup=ok_keyboard)
+        await CommonUserStates.send_actions.set()
     elif text == "Give me this test!":
         await state.finish()
         quests = list(QUIZ.keys())
@@ -80,7 +71,7 @@ async def passing_quiz(message: types.Message):
     while not now_question.poll.is_closed:
         await asyncio.sleep(0.1)
 
-    if data["num"] == 20:  # исправить
+    if data["num"] == 20:
         data["result"] = int(100 * (data["result"] / 20))
         await message.answer(text=f"My congratulations, you know Innopolis on {data['result']}%")
 
@@ -91,25 +82,19 @@ async def passing_quiz(message: types.Message):
                 types.KeyboardButton(text="No, not now")
             ]
             keyboard.add(*buttons)
-            await message.answer(text="Would you like to be respondent?")
-            await message.answer(text="The liability of the respondent includes:\n\n"
-                                      "1. Answer up to 10 questions about Innopolis\n"
-                                      "2. Respond with culture and respect to the question\n"
-                                      "3. Answer correctly\n"
-                                      "4. Please give full answers:\n"
-                                      "!!!Wrong: <s>It's so easy...</s>\n"
-                                      "a) If you want to find a question in data base:\n"
-                                      "-You need to send #Hashtags, which describe your question 🙋 \n"
-                                      "-After, you get some questions with the same #Hashtags\n"
-                                      "-Next, you can flip questions over by ⬅️➡️\n"
-                                      "b) If you want to create your question:\n"
-                                      "-You need to send the question\n"
-                                      "-After, send all #Hashtags in one message\n"
-                                      "-Next, you need only wait...",
-                                 parse_mode="HTML", reply_markup=keyboard)
+            await message.answer(text="Would you like to be respondent?", reply_markup=keyboard)
             await RespondentStates.wait_for_reply.set()
         else:
-            pass
+            res = requests.put(f"http://localhost:{PORT}/api_users/{message.from_user.id}", json={
+                'is_respondent': 1
+            }).json()
+            if 'success' in res:
+                await message.answer(text="Unfortunately, you failed the test,\n"
+                                          "but it will be available again soon.", reply_markup=ok_keyboard)
+                # тест должен появляться снова через неделю
+                await CommonUserStates.send_actions.set()
+            else:
+                await message.answer(text=f"Can't set is_respondent to 1 for @{message.from_user.username} :(")
 
         quiz_dict.pop(message.from_user.id)
         return

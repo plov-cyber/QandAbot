@@ -14,3 +14,10 @@ class RespondentStates(StatesGroup):
     """Respondent states."""
 
     wait_for_reply = State()
+    send_actions = State()
+
+
+class CommonUserStates(StatesGroup):
+    """States for simple user."""
+
+    send_actions = State()

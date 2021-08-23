@@ -8,7 +8,7 @@ from aiogram.dispatcher import FSMContext
 from api import PORT
 from data import db_session
 from data.UserModel import User
-from handlers.states import QuizStates
+from handlers.states import QuizStates, RespondentStates, CommonUserStates
 
 # Keyboard asking about passing quiz.
 keyboard_for_quiz = types.ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True)
@@ -26,9 +26,13 @@ async def cmd_start(message: types.Message, state: FSMContext):
     user = requests.get(f'http://localhost:{PORT}/api_users/{message.from_user.id}').json()
     if 'message' not in user:
         user = user['user']
-        await message.answer(text="There is nothing here yet. :(")
-        if user['is_respondent'] == 2:
-            pass
+        await message.answer(text="Nice to meet you again!",
+                             reply_markup=types.ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True,
+                                                                    keyboard=[[types.KeyboardButton(text="Let's go")]]))
+        if user['is_respondent'] in [0, 1, 2]:
+            await CommonUserStates.send_actions.set()
+        elif user['is_respondent'] == 3:
+            await RespondentStates.send_actions.set()
     else:
         requests.post(f'http://localhost:{PORT}/api_users', json={
             'id': message.from_user.id,
