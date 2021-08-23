@@ -25,4 +25,3 @@ api.add_resource(UsersListResource, '/api_users')
 
 if __name__ == '__main__':
     app.run('0.0.0.0', port=PORT)
-    os.remove('db/data.sqlite')

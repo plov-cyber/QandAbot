@@ -14,4 +14,4 @@ class User(SqlAlchemyBase, SerializerMixin):
     username = sqlalchemy.Column(sqlalchemy.String, unique=True, nullable=False)
     first_name = sqlalchemy.Column(sqlalchemy.String, nullable=False)
     last_name = sqlalchemy.Column(sqlalchemy.String)
-    is_respondent = sqlalchemy.Column(sqlalchemy.Boolean, nullable=False, default=False)
+    is_respondent = sqlalchemy.Column(sqlalchemy.SmallInteger, nullable=False, default=0)
