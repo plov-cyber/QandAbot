@@ -5,9 +5,8 @@ from aiogram.contrib.fsm_storage.memory import MemoryStorage
 
 from callbacks.common import register_cb_query_handlers
 from config import TOKEN
-from handlers.common import register_common_handlers
-from handlers.questions import register_question_handlers
-from handlers.quiz import register_quiz_handlers
+from handlers.common_handlers import register_common_handlers
+from handlers.quiz_handlers import register_quiz_handlers
 
 logging.basicConfig(level=logging.INFO)
 
@@ -15,7 +14,6 @@ bot = Bot(token=TOKEN)
 dp = Dispatcher(bot, storage=MemoryStorage())
 
 register_common_handlers(dp)
-register_question_handlers(dp)
 register_cb_query_handlers(dp)
 register_quiz_handlers(dp)
 

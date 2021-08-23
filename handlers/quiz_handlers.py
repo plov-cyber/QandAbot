@@ -4,7 +4,7 @@ from random import shuffle
 from aiogram import Dispatcher, types
 
 from handlers.quiz_text import QUIZ
-from handlers.states import QuizStates
+from handlers.states import QuizStates, RespondentStates
 
 quiz_dict = {}
 
@@ -52,8 +52,36 @@ async def passing_quiz(message: types.Message):
     while not now_question.poll.is_closed:
         await asyncio.sleep(0.1)
 
-    if data["num"] == 17:  # исправить потом
-        await message.answer(text=f"Nice job! Your result is {data['result']}/17.")
+    if data["num"] == 17:  # исправить
+        data["result"] = int(100 * (data["result"] / 17))
+        await message.answer(text=f"My congratulations, you know Innopolis on {data['result']}%")
+
+        if data["result"] >= 40:
+            keyboard = types.ReplyKeyboardMarkup(one_time_keyboard=True, resize_keyboard=True)
+            buttons = [
+                types.KeyboardButton(text="Yes, with pleasure"),
+                types.KeyboardButton(text="No, not now")
+            ]
+            keyboard.add(*buttons)
+            await message.answer(text="Would you like to be respondent?")
+            await message.answer(text="The liability of the respondent includes:\n\n"
+                                      "1. Answer up to 10 questions about Innopolis\n"
+                                      "2. Respond with culture and respect to the question\n"
+                                      "3. Answer correctly\n"
+                                      "4. Please give full answers:\n"
+                                      "!!!Wrong: <s>It's so easy...</s>\n"
+                                      "a) If you want to find a question in data base:\n"
+                                      "-You need to send #Hashtags, which describe your question 🙋 \n"
+                                      "-After, you get some questions with the same #Hashtags\n"
+                                      "-Next, you can flip questions over by ⬅️➡️\n"
+                                      "b) If you want to create your question:\n"
+                                      "-You need to send the question\n"
+                                      "-After, send all #Hashtags in one message\n"
+                                      "-Next, you need only wait...",
+                                 parse_mode="HTML", reply_markup=keyboard)
+            await RespondentStates.wait_for_reply.set()
+        else:
+            pass  # доделать
         return
 
     await passing_quiz(message)
@@ -70,5 +98,4 @@ async def getting_quiz_answer(poll_answer: types.PollAnswer):
 
 def register_quiz_handlers(dp: Dispatcher):
     dp.register_message_handler(reply_on_quiz, state=QuizStates.wait_for_reply)
-    # dp.register_message_handler(passing_quiz, state=QuizStates.quiz)
     dp.register_poll_answer_handler(getting_quiz_answer)
