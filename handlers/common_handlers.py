@@ -29,7 +29,7 @@ async def cmd_start(message: types.Message, state: FSMContext):
     logger.info(msg=f"User {message.from_user.first_name}(@{message.from_user.username}) sent /start command.")
     await state.finish()
     user = requests.get(f'http://localhost:{PORT}/api_users/{message.from_user.id}').json()
-    if 'message' not in user:
+    if 'user' in user:
         user = user['user']
         await message.answer(text="Nice to meet you again!",
                              reply_markup=types.ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True,
@@ -65,6 +65,21 @@ async def cmd_help(message: types.Message, state: FSMContext):
                               "📩: l.rekhlov@innopolis.university\n"
                               "📩: s.kamalov@innopolis.university\n"
                               "telegram: @RRMOLL\n", reply_markup=types.ReplyKeyboardRemove())
+
+
+async def send_user_to_main_menu(message: types.Message):
+    user = requests.get(f"http://localhost:{PORT}/api_users/{message.from_user.id}").json()
+    if "message" in user:
+        logger.error(msg=f"Can't get user {message.from_user.first_name}(@{message.from_user.username})")
+        await message.answer(text="Oops, something went wrong :(",
+                             reply_markup=types.ReplyKeyboardRemove())
+    else:
+        user = user['user']
+        stat = user['is_respondent']
+        if stat in [0, 1, 2]:
+            await CommonUserStates.send_actions.set()
+        elif stat == 3:
+            await RespondentStates.send_actions.set()
 
 
 def register_common_handlers(dp: Dispatcher):

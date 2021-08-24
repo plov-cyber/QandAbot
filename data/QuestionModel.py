@@ -16,10 +16,10 @@ class Question(SqlAlchemyBase, SerializerMixin):
 
     __tablename__ = 'questions'
 
-    id = sqlalchemy.Column(sqlalchemy.BigInteger, primary_key=True, index=True, autoincrement=True)
+    id = sqlalchemy.Column(sqlalchemy.Integer, primary_key=True, autoincrement=True, index=True)
     text = sqlalchemy.Column(sqlalchemy.String, unique=True, nullable=False)
     is_answered = sqlalchemy.Column(sqlalchemy.Boolean, nullable=False, default=0)
     from_user_id = sqlalchemy.Column(sqlalchemy.BigInteger, sqlalchemy.ForeignKey('users.id'))
     from_user = orm.relation('User')
-    answer = orm.relation('Answer', back_populates='question')
+    answers = orm.relation('Answer', back_populates='question')
     hashtags = orm.relation('Hashtag', secondary='question_to_hashtag', backref='questions')

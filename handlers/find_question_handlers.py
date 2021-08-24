@@ -3,10 +3,15 @@
 # Libraries, classes and functions imports
 import logging
 
+import requests
 from aiogram import types, Dispatcher
+from aiogram.dispatcher import FSMContext
 
+from api import PORT
 from data import db_session
 from data.QuestionModel import Question
+from handlers.common_handlers import send_user_to_main_menu
+from handlers.quiz_handlers import ok_keyboard
 from handlers.states import FindQuestionStates
 
 logger = logging.getLogger(__name__)
@@ -14,7 +19,7 @@ logger = logging.getLogger(__name__)
 user_data = {}
 
 
-async def get_hashtags(message: types.Message):
+async def get_hashtags(message: types.Message, state: FSMContext):
     """Gets hashtags from user and finds questions."""
 
     logger.info(msg=f"Getting hashtags from user {message.from_user.first_name}(@{message.from_user.username}).")
@@ -39,11 +44,18 @@ async def get_hashtags(message: types.Message):
     buttons = [
         types.InlineKeyboardButton(text='<--', callback_data="previous_question"),
         types.InlineKeyboardButton(text='-->', callback_data="next_question"),
-        types.InlineKeyboardButton(text='Show answers', callback_data="")
+        types.InlineKeyboardButton(text='Show answers', callback_data="show_answer")
     ]
     keyboard = types.InlineKeyboardMarkup(row_width=2)
     keyboard.add(*buttons)
-    await message.answer(text=f"{suit_questions[0]}")
+    if suit_questions:
+        await message.answer(text=f"{suit_questions[0].text}",
+                             reply_markup=keyboard)
+    else:
+        await message.answer(text="Sorry, but there are no questions.",
+                             reply_markup=ok_keyboard)
+        await state.finish()
+        await send_user_to_main_menu(message)
 
 
 def register_find_question_handlers(dp: Dispatcher):

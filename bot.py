@@ -6,7 +6,8 @@ import logging
 from aiogram import Bot, Dispatcher, executor
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
 
-from callbacks.common_callbacks import register_cb_query_handlers
+from callbacks.common_callbacks import register_common_callbacks
+from callbacks.find_question_callbacks import register_find_question_callbacks
 from config import TOKEN
 from handlers.ask_question_handlers import register_ask_question_handlers
 from handlers.common_handlers import register_common_handlers
@@ -24,12 +25,14 @@ logger = logging.getLogger(__name__)
 
 # Handlers and callbacks registration
 register_common_handlers(dp)
-register_cb_query_handlers(dp)
 register_quiz_handlers(dp)
 register_respondent_handlers(dp)
 register_common_user_handlers(dp)
 register_find_question_handlers(dp)
 register_ask_question_handlers(dp)
+
+register_common_callbacks(dp)
+register_find_question_callbacks(dp)
 
 
 async def shutdown(dp: Dispatcher):

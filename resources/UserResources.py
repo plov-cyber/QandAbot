@@ -24,6 +24,15 @@ def abort_if_user_not_found(user_id):
         abort(404, message=f"User {user_id} is not found.")
 
 
+def abort_if_user_already_exists(user_id):
+    """Function to check if user already exists."""
+
+    session = db_session.create_session()
+    user = session.query(User).get(user_id)
+    if user:
+        abort(404, message=f"User @{user.username} already exists.")
+
+
 class UserResource(Resource):
     """Resource to get and delete user, change user's data."""
 
@@ -33,7 +42,7 @@ class UserResource(Resource):
         abort_if_user_not_found(user_id)
         session = db_session.create_session()
         user = session.query(User).get(user_id)
-        return jsonify({'user': user.to_dict()})
+        return jsonify({'user': user.to_dict(only=['id', 'username', 'first_name', 'last_name', 'is_respondent'])})
 
     def put(self, user_id):
         """Change user's data."""
@@ -73,6 +82,7 @@ class UsersListResource(Resource):
         """Add new user."""
 
         args = parser.parse_args()
+        abort_if_user_already_exists(args['id'])
         session = db_session.create_session()
         user = User(
             id=args['id'],

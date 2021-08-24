@@ -46,7 +46,9 @@ async def react_to_actions(message: types.Message, state: FSMContext):
     if text == "Become respondent":
         user = requests.get(f"http://localhost:{PORT}/api_users/{message.from_user.id}").json()
         if "message" in user:
-            await message.answer(text=user["message"], reply_markup=types.ReplyKeyboardRemove())
+            logger.error(msg=f"Can't get user {message.from_user.first_name}(@{message.from_user.username})")
+            await message.answer(text="Oops, something went wrong :(",
+                                 reply_markup=types.ReplyKeyboardRemove())
             await state.finish()
         else:
             user = user['user']
@@ -66,7 +68,9 @@ async def react_to_actions(message: types.Message, state: FSMContext):
                                          reply_markup=ok_keyboard)
                     await RespondentStates.send_actions.set()
                 else:
-                    await message.answer(text=f"Can't set is_respondent 3 for @{message.from_user.username} :(",
+                    logger.error(msg=f"Can't set is_respondent to 3 "
+                                     f"for {message.from_user.first_name}(@{message.from_user.username}).")
+                    await message.answer(text="Oops, something went wrong :(",
                                          reply_markup=types.ReplyKeyboardRemove())
                     await state.finish()
     elif text == "Ask question":

@@ -9,7 +9,7 @@ from aiogram.dispatcher import FSMContext
 
 from api import PORT
 from handlers.quiz_handlers import ok_keyboard
-from handlers.states import RespondentStates, CommonUserStates, FindQuestionStates
+from handlers.states import RespondentStates, CommonUserStates, FindQuestionStates, AskQuestionStates
 
 logger = logging.getLogger(__name__)
 
@@ -27,7 +27,9 @@ async def reply_on_respondent(message: types.Message, state: FSMContext):
                                  reply_markup=ok_keyboard)
             await RespondentStates.send_actions.set()
         else:
-            await message.answer(text=f"Can't set is_respondent to 3 for @{message.from_user.username} :(",
+            logger.error(msg=f"Can't set is_respondent to 3 "
+                             f"for {message.from_user.first_name}(@{message.from_user.username}).")
+            await message.answer(text="Oops, something went wrong :(",
                                  reply_markup=types.ReplyKeyboardRemove())
             await state.finish()
     elif text == "No, not now":
@@ -39,7 +41,9 @@ async def reply_on_respondent(message: types.Message, state: FSMContext):
                                  reply_markup=ok_keyboard)
             await CommonUserStates.send_actions.set()
         else:
-            await message.answer(text=f"Can't set is_respondent to 2 for @{message.from_user.username} :(",
+            logger.error(msg=f"Can't set is_respondent to 2 "
+                             f"for {message.from_user.first_name}(@{message.from_user.username}).")
+            await message.answer(text="Oops, something went wrong :(",
                                  reply_markup=types.ReplyKeyboardRemove())
             await state.finish()
     else:
@@ -83,7 +87,9 @@ async def react_to_actions(message: types.Message, state: FSMContext):
                              reply_markup=types.ReplyKeyboardRemove())
         await FindQuestionStates.getting_hashtags.set()
     elif text == "Ask question":
-        pass
+        await message.answer(text="Goood choice👍 Please send me your question⁉️:",
+                             reply_markup=types.ReplyKeyboardRemove())
+        await AskQuestionStates.getting_question.set()
     elif text == "Check mail":
         pass
 

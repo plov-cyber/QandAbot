@@ -10,5 +10,5 @@ class Hashtag(SqlAlchemyBase, SerializerMixin):
 
     __tablename__ = 'hashtags'
 
-    id = sqlalchemy.Column(sqlalchemy.BigInteger, primary_key=True, index=True, autoincrement=True)
-    hashtag = sqlalchemy.Column(sqlalchemy.String, nullable=False)
+    id = sqlalchemy.Column(sqlalchemy.Integer, primary_key=True, index=True, autoincrement=True)
+    text = sqlalchemy.Column(sqlalchemy.String, nullable=False, unique=True)

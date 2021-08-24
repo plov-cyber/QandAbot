@@ -22,6 +22,15 @@ def abort_if_answer_not_found(answer_id):
         abort(404, message=f"Answer {answer_id} is not found.")
 
 
+def abort_if_answer_already_exists(answer_text):
+    """Function to check if answer already exists."""
+
+    session = db_session.create_session()
+    answer = session.query(Answer).filter(Answer.text == answer_text).all()
+    if answer:
+        abort(404, message=f"Answer \"{answer[0].text}\" already exists.")
+
+
 class AnswerResource(Resource):
     """Resource to ..."""  # write
 

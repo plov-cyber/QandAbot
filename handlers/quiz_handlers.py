@@ -30,6 +30,7 @@ async def reply_on_quiz(message: types.Message, state: FSMContext):
 
     text = message.text
     if text == "Skip the test":
+        logger.info(msg=f"User {message.from_user.first_name}(@{message.from_user.username}) skipped the test.")
         await state.finish()
         await message.answer(text="You can always return to the test to be able to answer questions.",
                              reply_markup=ok_keyboard)
@@ -102,7 +103,9 @@ async def passing_quiz(message: types.Message):
                 # тест должен появляться снова через неделю
                 await CommonUserStates.send_actions.set()
             else:
-                await message.answer(text=f"Can't set is_respondent to 1 for @{message.from_user.username} :(")
+                logger.error(msg=f"Can't set is_respondent to 1 "
+                                 f"for {message.from_user.first_name}(@{message.from_user.username}).")
+                await message.answer(text="Oops, something went wrong :(")
 
         quiz_dict.pop(message.from_user.id)
         return
