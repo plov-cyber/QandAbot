@@ -1,6 +1,8 @@
 """Respondent handlers."""
 
 # Libraries, classes and functions imports
+import logging
+
 import requests
 from aiogram import types, Dispatcher
 from aiogram.dispatcher import FSMContext
@@ -8,6 +10,8 @@ from aiogram.dispatcher import FSMContext
 from api import PORT
 from handlers.quiz_handlers import ok_keyboard
 from handlers.states import RespondentStates, CommonUserStates
+
+logger = logging.getLogger(__name__)
 
 
 async def reply_on_respondent(message: types.Message, state: FSMContext):
@@ -73,5 +77,6 @@ async def respondent_send_actions(message: types.Message):
 def register_respondent_handlers(dp: Dispatcher):
     """Registers all respondent_handlers to dispatcher."""
 
+    logger.info(msg=f"Registering respondent handlers.")
     dp.register_message_handler(reply_on_respondent, state=RespondentStates.wait_for_reply)
     dp.register_message_handler(respondent_send_actions, state=RespondentStates.send_actions)

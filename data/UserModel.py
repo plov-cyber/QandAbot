@@ -15,3 +15,5 @@ class User(SqlAlchemyBase, SerializerMixin):
     first_name = sqlalchemy.Column(sqlalchemy.String, nullable=False)
     last_name = sqlalchemy.Column(sqlalchemy.String)
     is_respondent = sqlalchemy.Column(sqlalchemy.SmallInteger, nullable=False, default=0)
+    questions = orm.relation('Question', back_populates='from_user')
+    answers = orm.relation('Answer', back_populates='from_user')

@@ -2,6 +2,7 @@
 
 # Libraries, classes and functions imports
 import asyncio
+import logging
 from time import time
 from random import shuffle
 
@@ -12,6 +13,8 @@ from aiogram.dispatcher import FSMContext
 from api import PORT
 from handlers.quiz_text import QUIZ
 from handlers.states import RespondentStates, QuizStates, CommonUserStates
+
+logger = logging.getLogger(__name__)
 
 # Dictionary with all users.
 quiz_dict = {}
@@ -50,6 +53,7 @@ async def passing_quiz(message: types.Message):
 
     data = quiz_dict[message.from_user.id]
     if data["num"] == -1:
+        logger.info(msg=f"User {message.from_user.first_name}(@{message.from_user.username}) starts passing the quiz.")
         await message.answer(text="Test will start in", reply_markup=types.ReplyKeyboardRemove())
         for i in range(3, 0, -1):
             await message.answer(text=f"{i}")
@@ -74,6 +78,7 @@ async def passing_quiz(message: types.Message):
         await asyncio.sleep(0.1)
 
     if data["num"] == 20:
+        logger.info(msg=f"User {message.from_user.first_name}(@{message.from_user.username}) passed the quiz.")
         data["result"] = int(100 * (data["result"] / 20))
         await message.answer(text=f"My congratulations, you know Innopolis on {data['result']}%")
 
@@ -118,5 +123,6 @@ async def getting_quiz_answer(poll_answer: types.PollAnswer):
 def register_quiz_handlers(dp: Dispatcher):
     """Registers all quiz_handlers to dispatcher."""
 
+    logger.info(msg=f"Registering quiz handlers.")
     dp.register_message_handler(reply_on_quiz, state=QuizStates.wait_for_reply)
     dp.register_poll_answer_handler(getting_quiz_answer)

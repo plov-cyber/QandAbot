@@ -13,10 +13,12 @@ from handlers.common_user_handlers import register_common_user_handlers
 from handlers.quiz_handlers import register_quiz_handlers
 from handlers.respondent_handlers import register_respondent_handlers
 
-# Creating bot and dispatcher
-logging.basicConfig(level=logging.INFO)
+# Creating bot, logger and dispatcher
+logging.basicConfig(level=logging.INFO,
+                    format="%(asctime)s - %(levelname)s - %(name)s - %(message)s")
 bot = Bot(token=TOKEN)
 dp = Dispatcher(bot, storage=MemoryStorage())
+logger = logging.getLogger(__name__)
 
 # Handlers and callbacks registration
 register_common_handlers(dp)

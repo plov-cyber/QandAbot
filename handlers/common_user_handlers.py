@@ -1,6 +1,8 @@
 """Common User handlers."""
 
 # Libraries, classes and functions imports
+import logging
+
 import requests
 from aiogram import types, Dispatcher
 from aiogram.dispatcher import FSMContext
@@ -9,6 +11,8 @@ from api import PORT
 from handlers.common_handlers import keyboard_for_quiz
 from handlers.quiz_handlers import ok_keyboard
 from handlers.states import CommonUserStates, QuizStates, RespondentStates
+
+logger = logging.getLogger(__name__)
 
 
 async def common_user_send_actions(message: types.Message):
@@ -74,5 +78,6 @@ async def react_to_actions(message: types.Message, state: FSMContext):
 def register_common_user_handlers(dp: Dispatcher):
     """Registers all common_user_handlers to dispatcher."""
 
+    logger.info(msg=f"Registering common user handlers.")
     dp.register_message_handler(common_user_send_actions, state=CommonUserStates.send_actions)
     dp.register_message_handler(react_to_actions, state=CommonUserStates.react_to_actions)
