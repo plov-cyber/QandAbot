@@ -11,6 +11,8 @@ from handlers.states import FindQuestionStates
 
 logger = logging.getLogger(__name__)
 
+user_data = {}
+
 
 async def get_hashtags(message: types.Message):
     """Gets hashtags from user and finds questions."""
@@ -31,7 +33,17 @@ async def get_hashtags(message: types.Message):
         suit_hashtags = list(set(q_hashs) & set(hashtags))
         if suit_hashtags:
             suit_questions.append((q, len(suit_hashtags)))
-    suit_questions.sort(key=lambda x: x[1], reverse=True)
+    suit_questions = list(map(lambda x: x[0], sorted(suit_questions, key=lambda x: x[1])))  # list of questions
+    user_data[message.from_user.id] = (0, suit_questions)
+
+    buttons = [
+        types.InlineKeyboardButton(text='<--', callback_data="previous_question"),
+        types.InlineKeyboardButton(text='-->', callback_data="next_question"),
+        types.InlineKeyboardButton(text='Show answers', callback_data="")
+    ]
+    keyboard = types.InlineKeyboardMarkup(row_width=2)
+    keyboard.add(*buttons)
+    await message.answer(text=f"{suit_questions[0]}")
 
 
 def register_find_question_handlers(dp: Dispatcher):

@@ -38,6 +38,7 @@ async def reply_on_quiz(message: types.Message, state: FSMContext):
         await state.finish()
         quests = list(QUIZ.keys())
         shuffle(quests)
+        quests = quests[:20]
         quiz_dict[message.from_user.id] = {
             "num": -1,
             "quests": quests,
