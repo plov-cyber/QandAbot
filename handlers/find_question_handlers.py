@@ -34,8 +34,8 @@ async def get_hashtags(message: types.Message):
     suit_questions.sort(key=lambda x: x[1], reverse=True)
 
 
-
 def register_find_question_handlers(dp: Dispatcher):
     """Registers all find_question_handler to dispatcher."""
 
+    logger.info(msg=f"Registering find_question handlers.")
     dp.register_message_handler(get_hashtags, state=FindQuestionStates.getting_hashtags)

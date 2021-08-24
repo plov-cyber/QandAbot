@@ -28,3 +28,10 @@ class FindQuestionStates(StatesGroup):
     """States for finding questions."""
 
     getting_hashtags = State()
+
+
+class AskQuestionStates(StatesGroup):
+    """States for asking questions."""
+
+    getting_question = State()
+    getting_hashtags = State()

@@ -10,7 +10,7 @@ from aiogram.dispatcher import FSMContext
 from api import PORT
 from handlers.common_handlers import keyboard_for_quiz
 from handlers.quiz_handlers import ok_keyboard
-from handlers.states import CommonUserStates, QuizStates, RespondentStates, FindQuestionStates
+from handlers.states import CommonUserStates, QuizStates, RespondentStates, FindQuestionStates, AskQuestionStates
 
 logger = logging.getLogger(__name__)
 
@@ -70,7 +70,9 @@ async def react_to_actions(message: types.Message, state: FSMContext):
                                          reply_markup=types.ReplyKeyboardRemove())
                     await state.finish()
     elif text == "Ask question":
-        pass
+        await message.answer(text="Goood choice👍 Please send me your question⁉️:",
+                             reply_markup=types.ReplyKeyboardRemove())
+        await AskQuestionStates.getting_question.set()
     elif text == "Find question":
         await message.answer("So goood 👍 Send me hashtags, which describe your question:",
                              reply_markup=types.ReplyKeyboardRemove())
