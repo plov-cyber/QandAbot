@@ -9,7 +9,7 @@ from aiogram.dispatcher import FSMContext
 
 from api import PORT
 from handlers.quiz_handlers import ok_keyboard
-from handlers.states import RespondentStates, CommonUserStates
+from handlers.states import RespondentStates, CommonUserStates, FindQuestionStates
 
 logger = logging.getLogger(__name__)
 
@@ -53,7 +53,7 @@ async def respondent_send_actions(message: types.Message):
                                                         row_width=1)
     buttons = [
         types.KeyboardButton(text="Ask question"),
-        types.KeyboardButton(text="Find answer"),
+        types.KeyboardButton(text="Find question"),
         types.KeyboardButton(text="Check mail")
     ]
     keyboard_for_respondent.add(*buttons)
@@ -72,6 +72,20 @@ async def respondent_send_actions(message: types.Message):
                               "-After, send all #Hashtags in one message\n"
                               "-Next, you need only wait...",
                          parse_mode="HTML", reply_markup=keyboard_for_respondent)
+
+
+async def react_to_actions(message: types.Message, state: FSMContext):
+    """Different reactions to actions."""
+
+    text = message.text
+    if text == "Find question":
+        await message.answer("So goood 👍 Send me hashtags, which describe your question:",
+                             reply_markup=types.ReplyKeyboardRemove())
+        await FindQuestionStates.getting_hashtags.set()
+    elif text == "Ask question":
+        pass
+    elif text == "Check mail":
+        pass
 
 
 def register_respondent_handlers(dp: Dispatcher):

@@ -1,3 +1,3 @@
 """File with all models for database."""
 
-from . import UserModel, QuestionModel, AnswerModel
+from . import UserModel, QuestionModel, AnswerModel, HashtagModel

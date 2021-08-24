@@ -10,7 +10,7 @@ from aiogram.dispatcher import FSMContext
 from api import PORT
 from handlers.common_handlers import keyboard_for_quiz
 from handlers.quiz_handlers import ok_keyboard
-from handlers.states import CommonUserStates, QuizStates, RespondentStates
+from handlers.states import CommonUserStates, QuizStates, RespondentStates, FindQuestionStates
 
 logger = logging.getLogger(__name__)
 
@@ -22,7 +22,7 @@ async def common_user_send_actions(message: types.Message):
                                                        row_width=1)
     buttons = [
         types.KeyboardButton(text="Ask question"),
-        types.KeyboardButton(text="Find solution"),
+        types.KeyboardButton(text="Find question"),
         types.KeyboardButton(text="Become respondent")
     ]
     keyboard_for_questions.add(*buttons)
@@ -72,7 +72,9 @@ async def react_to_actions(message: types.Message, state: FSMContext):
     elif text == "Ask question":
         pass
     elif text == "Find question":
-        pass
+        await message.answer("So goood 👍 Send me hashtags, which describe your question:",
+                             reply_markup=types.ReplyKeyboardRemove())
+        await FindQuestionStates.getting_hashtags.set()
 
 
 def register_common_user_handlers(dp: Dispatcher):

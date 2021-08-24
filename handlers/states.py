@@ -22,3 +22,9 @@ class CommonUserStates(StatesGroup):
 
     send_actions = State()
     react_to_actions = State()
+
+
+class FindQuestionStates(StatesGroup):
+    """States for finding questions."""
+
+    getting_hashtags = State()
