@@ -17,6 +17,13 @@ from handlers.states import FindQuestionStates
 logger = logging.getLogger(__name__)
 
 user_data = {}
+buttons = [
+        types.InlineKeyboardButton(text='<--', callback_data="previous_question"),
+        types.InlineKeyboardButton(text='-->', callback_data="next_question"),
+        types.InlineKeyboardButton(text='Show answers', callback_data="show_answer")
+    ]
+showing_questions_keyboard = types.InlineKeyboardMarkup(row_width=2)
+showing_questions_keyboard.add(*buttons)
 
 
 async def get_hashtags(message: types.Message, state: FSMContext):
@@ -41,16 +48,9 @@ async def get_hashtags(message: types.Message, state: FSMContext):
     suit_questions = list(map(lambda x: x[0], sorted(suit_questions, key=lambda x: x[1])))  # list of questions
     user_data[message.from_user.id] = (0, suit_questions)
 
-    buttons = [
-        types.InlineKeyboardButton(text='<--', callback_data="previous_question"),
-        types.InlineKeyboardButton(text='-->', callback_data="next_question"),
-        types.InlineKeyboardButton(text='Show answers', callback_data="show_answer")
-    ]
-    keyboard = types.InlineKeyboardMarkup(row_width=2)
-    keyboard.add(*buttons)
     if suit_questions:
         await message.answer(text=f"{suit_questions[0].text}",
-                             reply_markup=keyboard)
+                             reply_markup=showing_questions_keyboard)
     else:
         await message.answer(text="Sorry, but there are no questions.",
                              reply_markup=ok_keyboard)

@@ -45,17 +45,18 @@ class HashtagsListResource(Resource):
         """Add new hashtag"""
 
         args = parser.parse_args()
-        abort_if_hashtag_already_exists(args['text'])
         session = db_session.create_session()
-        hashtag = Hashtag(
-            text=args['text']
-        )
-        question = session.query(Question).filter(Question.text == args['question'])
+        hashtag = session.query(Hashtag).filter(Hashtag.text == args['text']).all()
+        if not hashtag:
+            hashtag = Hashtag(
+                text=args['text']
+            )
+            session.add(hashtag)
+        else:
+            hashtag = hashtag[0]
+        question = session.query(Question).filter(Question.text == args['question']).all()
         if question:
-            question = question[0]
-            question.hashtags.append(hashtag)
-            session.merge(question)
-        session.add(hashtag)
+            hashtag.questions.append(question[0])
         session.commit()
         return jsonify({'success': 'OK'})
 

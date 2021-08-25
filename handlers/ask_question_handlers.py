@@ -26,10 +26,7 @@ async def get_question(message: types.Message, state: FSMContext):
         'from_user_id': message.from_user.id
     }).json()
     if 'success' not in res:
-        logger.error(msg=f"Can't add question \"{question}\" from "
-                         f"user {message.from_user.first_name}(@{message.from_user.username})")
-        await message.answer(text="Oops, something went wrong :(")
-        await state.finish()
+        await message.answer(text="This question already exists")
         return
 
     await state.update_data(question=question)
@@ -55,12 +52,6 @@ async def get_hashtags(message: types.Message, state: FSMContext):
             'text': h,
             'question': user_data['question']
         }).json()
-        if 'success' not in res:
-            logger.error(msg=f"Can't add hashtag \"{h}\" from "
-                             f"user {message.from_user.first_name}(@{message.from_user.username})")
-            await message.answer(text="Oops, something went wrong :(")
-            await state.finish()
-            return
 
     await message.answer(text="Ohh thanks for question, It joins to the work ⚙️ We will notify you 📩",
                          reply_markup=ok_keyboard)

@@ -76,6 +76,7 @@ async def respondent_send_actions(message: types.Message):
                               "-After, send all #Hashtags in one message\n"
                               "-Next, you need only wait...",
                          parse_mode="HTML", reply_markup=keyboard_for_respondent)
+    await RespondentStates.react_to_actions.set()
 
 
 async def react_to_actions(message: types.Message, state: FSMContext):
@@ -100,3 +101,4 @@ def register_respondent_handlers(dp: Dispatcher):
     logger.info(msg=f"Registering respondent handlers.")
     dp.register_message_handler(reply_on_respondent, state=RespondentStates.wait_for_reply)
     dp.register_message_handler(respondent_send_actions, state=RespondentStates.send_actions)
+    dp.register_message_handler(react_to_actions, state=RespondentStates.react_to_actions)

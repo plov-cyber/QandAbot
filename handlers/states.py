@@ -15,6 +15,7 @@ class RespondentStates(StatesGroup):
 
     wait_for_reply = State()
     send_actions = State()
+    react_to_actions = State()
 
 
 class CommonUserStates(StatesGroup):
