@@ -3,11 +3,10 @@
 # Libraries, classes and functions imports
 import logging
 
-import requests
 from aiogram import types, Dispatcher
 from aiogram.dispatcher import FSMContext
 
-from api import PORT
+from api import PORT, req
 from handlers.quiz_handlers import ok_keyboard
 from handlers.states import RespondentStates, CommonStates
 
@@ -19,7 +18,7 @@ async def reply_on_respondent(message: types.Message, state: FSMContext):
 
     text = message.text
     if text == "Yeah, with pleasure 😜":
-        res = requests.put(f"http://localhost:{PORT}/api_users/{message.from_user.id}", json={
+        res = req.put(f"http://localhost:{PORT}/api_users/{message.from_user.id}", json={
             'is_respondent': 3
         }).json()
         if 'success' in res:
@@ -35,7 +34,7 @@ async def reply_on_respondent(message: types.Message, state: FSMContext):
                                  reply_markup=types.ReplyKeyboardRemove())
             await state.finish()
     elif text == "No, not right now":
-        res = requests.put(f"http://localhost:{PORT}/api_users/{message.from_user.id}", json={
+        res = req.put(f"http://localhost:{PORT}/api_users/{message.from_user.id}", json={
             'is_respondent': 2
         }).json()
         if 'success' in res:

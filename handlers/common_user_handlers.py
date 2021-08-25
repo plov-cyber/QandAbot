@@ -3,11 +3,10 @@
 # Libraries, classes and functions imports
 import logging
 
-import requests
 from aiogram import types, Dispatcher
 from aiogram.dispatcher import FSMContext
 
-from api import PORT
+from api import PORT, req
 from handlers.quiz_handlers import ok_keyboard
 from handlers.states import CommonUserStates, CommonStates, QuizStates, RespondentStates
 
@@ -42,7 +41,7 @@ async def common_user_react_to_inters(message: types.Message, state: FSMContext)
 
     text = message.text
     if text == 'Become respondent':
-        user = requests.get(f"http://localhost:{PORT}/api_users/{message.from_user.id}").json()
+        user = req.get(f"http://localhost:{PORT}/api_users/{message.from_user.id}").json()
         if "message" in user:
             logger.error(msg=f"Can't get user {message.from_user.first_name}(@{message.from_user.username})")
             await message.answer(text="Oops, something went wrong :(",
@@ -60,7 +59,7 @@ async def common_user_react_to_inters(message: types.Message, state: FSMContext)
                                      reply_markup=keyboard_for_quiz)
                 await QuizStates.wait_for_reply.set()
             elif stat == 2:
-                res = requests.put(f"http://localhost:{PORT}/api_users/{message.from_user.id}", json={
+                res = req.put(f"http://localhost:{PORT}/api_users/{message.from_user.id}", json={
                     'is_respondent': 3
                 }).json()
                 if 'success' in res:

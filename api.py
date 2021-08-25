@@ -33,5 +33,8 @@ api.add_resource(AnswersListResource, '/api_answers')
 api.add_resource(HashtagResource, '/api_hashtags/<int:hashtag_id>')
 api.add_resource(HashtagsListResource, '/api_hashtags')
 
+# Creating session for all requests
+req = requests.Session()
+
 if __name__ == '__main__':
     app.run('0.0.0.0', port=PORT)

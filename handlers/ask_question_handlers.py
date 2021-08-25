@@ -3,11 +3,10 @@
 # Libraries, classes and functions imports
 import logging
 
-import requests
 from aiogram import types, Dispatcher
 from aiogram.dispatcher import FSMContext
 
-from api import PORT
+from api import PORT, req
 from handlers.common_handlers import send_user_to_main_menu
 from handlers.states import AskQuestionStates
 
@@ -18,7 +17,7 @@ async def get_question(message: types.Message, state: FSMContext):
     """Gets question from user."""
 
     question = message.text
-    res = requests.post(f'http://localhost:{PORT}/api_questions', json={
+    res = req.post(f'http://localhost:{PORT}/api_questions', json={
         'text': question,
         'is_answered': False,
         'from_user_id': message.from_user.id
@@ -46,7 +45,7 @@ async def get_hashtags(message: types.Message, state: FSMContext):
     hashtags = hashtags[1:].lower().split('#')
     for h in hashtags:
         h = h.strip()
-        res = requests.post(f'http://localhost:{PORT}/api_hashtags', json={
+        res = req.post(f'http://localhost:{PORT}/api_hashtags', json={
             'text': h,
             'question': user_data['question']
         }).json()

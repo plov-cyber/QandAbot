@@ -6,11 +6,10 @@ import logging
 from time import time
 from random import shuffle
 
-import requests
 from aiogram import Dispatcher, types
 from aiogram.dispatcher import FSMContext
 
-from api import PORT
+from api import PORT, req
 from handlers.quiz_text import QUIZ
 from handlers.states import RespondentStates, QuizStates, CommonUserStates
 
@@ -95,7 +94,7 @@ async def passing_quiz(message: types.Message, state: FSMContext):
                                       "and the most active resident of the Innopolis?", reply_markup=keyboard)
             await RespondentStates.wait_for_reply.set()
         else:
-            res = requests.put(f"http://localhost:{PORT}/api_users/{message.from_user.id}", json={
+            res = req.put(f"http://localhost:{PORT}/api_users/{message.from_user.id}", json={
                 'is_respondent': 1
             }).json()
             if 'success' in res:

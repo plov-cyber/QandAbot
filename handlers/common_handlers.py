@@ -3,11 +3,10 @@
 # Libraries, classes and functions imports
 import logging
 
-import requests
 from aiogram import types, Dispatcher
 from aiogram.dispatcher import FSMContext
 
-from api import PORT
+from api import PORT, req
 from handlers.common_user_handlers import common_user_send_actions, common_user_send_interactions
 from handlers.respondent_handlers import respondent_send_actions, respondent_send_interactions
 from handlers.states import QuizStates, RespondentStates, CommonUserStates, AskQuestionStates, FindQuestionStates, \
@@ -29,11 +28,11 @@ async def cmd_start(message: types.Message, state: FSMContext):
 
     logger.info(msg=f"User {message.from_user.first_name}(@{message.from_user.username}) sent /start command.")
     await state.finish()
-    user = requests.get(f'http://localhost:{PORT}/api_users/{message.from_user.id}').json()
+    user = req.get(f'http://localhost:{PORT}/api_users/{message.from_user.id}').json()
     if 'user' in user:
         await send_user_to_main_menu(message)
     else:
-        requests.post(f'http://localhost:{PORT}/api_users', json={
+        req.post(f'http://localhost:{PORT}/api_users', json={
             'id': message.from_user.id,
             'username': message.from_user.username,
             'first_name': message.from_user.first_name,
@@ -73,7 +72,7 @@ async def send_user_to_main_menu(message: types.Message):
     """Sends user to main menu."""
 
     logger.info(msg=f"User {message.from_user.first_name}(@{message.from_user.username}) is in main menu now.")
-    user = requests.get(f"http://localhost:{PORT}/api_users/{message.from_user.id}").json()
+    user = req.get(f"http://localhost:{PORT}/api_users/{message.from_user.id}").json()
     if "message" in user:
         logger.error(msg=f"Can't get user {message.from_user.first_name}(@{message.from_user.username})")
         await message.answer(text="Oops, something went wrong :(",
@@ -95,7 +94,7 @@ async def react_to_actions(message: types.Message, state: FSMContext):
     text = message.text
     if text == "Interaction":
         logger.info(msg=f"User {message.from_user.first_name}(@{message.from_user.username}) opened Interaction menu.")
-        user = requests.get(f'http://localhost:{PORT}/api_users/{message.from_user.id}').json()
+        user = req.get(f'http://localhost:{PORT}/api_users/{message.from_user.id}').json()
         if 'message' in user:
             logger.error(msg=f"Can't find user {message.from_user.first_name}(@{message.from_user.username}).")
             await message.answer(text="Oops, something went wrong :(",
