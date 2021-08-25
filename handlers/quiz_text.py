@@ -46,8 +46,32 @@ QUIZ = {
         "Bon Appetit", ["Bon Appetit", "Приятного аппетита", "Buen provecho", "good appetit"]),
     "What time does the Mayor run around on Sunday?": ("9:00", ["9:30", "9:00", "8:30", "10:00"]),
     "Where to find the events that will be on ArtSpace?": (
-    "ArtSpace events", ["ArtSpace events", "ArtSpace", "ArtSpace Events", "ArtSpaceEvents"]),
+        "ArtSpace events", ["ArtSpace events", "ArtSpace", "ArtSpace Events", "ArtSpaceEvents"]),
     "What is it 'Rage' in Innopolis?": ("Club of Russian Ancient Games & Entertainments",
                                         ["Football team", "Club of Russian Ancient Games & Entertainments",
-                                         "Innopolis system", "Shop in Innopolis"])
+                                         "Innopolis system", "Shop in Innopolis"]),
+    "What are the guests hours in dorm?": (
+        "9:00 - 23:00", ["9:00 - 23:00", "7:00 - 22:00", "8:00 - 23:00", "9:00 - 21:00"]),
+    "How much rent for 1room flat at reduced rate costs?": (
+        "9 000 rub", ["9 000 rub", "11 000 rub", "7 500 rub", "15 000 rub"]),
+    "How much room in the dorm costs for a student per a day?": ("80 rub", ["80 rub", "90 rub", "70 rub", "100 rub"]),
+    "How much food-combo for a day costs in canteen?": ("445 rub", ["445 rub", "450 rub", "455 rub", "440 rub"]),
+    "Whats the price for bus ticket to Kazan?": ("125 rub by credit card and 150 rub by cash",
+                                                 ["125 rub by credit card and 150 rub by cash",
+                                                  "150 rub by credit card and 125 rub by cash", "150 rub for the road",
+                                                  "125 rub for the road"]),
+    "Where you can find bus schedule in the Telegram?": (
+        "InnoBus 2.0", ["InnoBus", "InnoBus 1.0", "InnoBus 2.0", "Inno_shedule_bus"]),
+    "What are working hours of sport complex?": (
+        "7:00 - 23:00", ["7:00 - 23:00", "6:00 - 21:00", "8:00 - 22:00", "9:00 - 23:00"]),
+    "Whats the average cost of self-driving taxi?": (
+        "totally free", ["100~120 rub", "75~100 rub", "totally free", "140~160 rub"]),
+    "Where is the biggest assortment of household goods?": (
+        "'Магнит косметик'", ["'Магнит косметик'", "'Пятерочка'", "ZimaLeto", "'Бахатле'"]),
+    "Which company has not special license for students?": ("Yandex", ["Yandex", "OneDrive", "Notion", "JetBrains"]),
+    "Where should you write to get access for self-driving taxi?": (
+        "@InnopolisHelp", ["@InnopolisHelp", "@Inno_Self-Driving", "@Yandex_Self-Driving", "@InnoHelpBot"]),
+    "In what year was Innopolis founded? ": ("2012 year", ["2010 year", "2011 year", "2012 year", "2013 year"]),
+    "How to buy tickets to Innopolis_Cinema? ": ("By website", ["By website", "By cash or credit card in the cinema",
+                                                                "In the Cinema channel", "In the Cinema channel"])
 }
