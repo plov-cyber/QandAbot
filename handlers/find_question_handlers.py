@@ -3,39 +3,30 @@
 # Libraries, classes and functions imports
 import logging
 
-import requests
 from aiogram import types, Dispatcher
 from aiogram.dispatcher import FSMContext
 
-from api import PORT
 from data import db_session
 from data.QuestionModel import Question
 from handlers.common_handlers import send_user_to_main_menu
-from handlers.quiz_handlers import ok_keyboard
 from handlers.states import FindQuestionStates
 
 logger = logging.getLogger(__name__)
 
 user_data = {}
-buttons = [
-        types.InlineKeyboardButton(text='<--', callback_data="previous_question"),
-        types.InlineKeyboardButton(text='-->', callback_data="next_question"),
-        types.InlineKeyboardButton(text='Show answers', callback_data="show_answer")
-    ]
-showing_questions_keyboard = types.InlineKeyboardMarkup(row_width=2)
-showing_questions_keyboard.add(*buttons)
+showing_questions_keyboard = types.InlineKeyboardMarkup(row_width=3)
 
 
 async def get_hashtags(message: types.Message, state: FSMContext):
     """Gets hashtags from user and finds questions."""
 
-    logger.info(msg=f"Getting hashtags from user {message.from_user.first_name}(@{message.from_user.username}).")
     hashtags = message.text
     if hashtags[0] != '#':
         await message.answer(text="Please write hashtags like this: #hashtag1#hashtag2...")
         return
 
     hashtags = hashtags[1:].lower().split('#')
+    logger.info(msg=f"Got hashtags from user {message.from_user.first_name}(@{message.from_user.username}).")
 
     session = db_session.create_session()
     questions = session.query(Question).all()
@@ -47,13 +38,19 @@ async def get_hashtags(message: types.Message, state: FSMContext):
             suit_questions.append((q, len(suit_hashtags)))
     suit_questions = list(map(lambda x: x[0], sorted(suit_questions, key=lambda x: x[1])))  # list of questions
     user_data[message.from_user.id] = (0, suit_questions)
-
-    if suit_questions:
+    size = len(suit_questions)
+    buttons = [
+        types.InlineKeyboardButton(text='<--', callback_data="previous_question"),
+        types.InlineKeyboardButton(text=f'1/{size}', callback_data="question_num"),
+        types.InlineKeyboardButton(text='-->', callback_data="next_question"),
+        types.InlineKeyboardButton(text='Show answer', callback_data="show_answer")
+    ]
+    showing_questions_keyboard.add(*buttons)
+    if size:
         await message.answer(text=f"{suit_questions[0].text}",
                              reply_markup=showing_questions_keyboard)
     else:
-        await message.answer(text="Sorry, but there are no questions.",
-                             reply_markup=ok_keyboard)
+        await message.answer(text="Sorry, but there are no questions.")
         await state.finish()
         await send_user_to_main_menu(message)
 

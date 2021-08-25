@@ -29,14 +29,14 @@ async def reply_on_quiz(message: types.Message, state: FSMContext):
     """Different replies before quiz."""
 
     text = message.text
-    if text == "Skip the test":
+    if text == "I prefer to do it later":
         logger.info(msg=f"User {message.from_user.first_name}(@{message.from_user.username}) skipped the test.")
         await state.finish()
         await message.answer(text="You can always return to the test to be able to answer questions.",
                              reply_markup=ok_keyboard)
         await CommonUserStates.send_actions.set()
     elif text == "Give me this test!":
-        await state.finish()
+        logger.info(msg=f"User {message.from_user.first_name}(@{message.from_user.username}) starts passing the quiz.")
         quests = list(QUIZ.keys())
         shuffle(quests)
         quests = quests[:20]
@@ -45,23 +45,23 @@ async def reply_on_quiz(message: types.Message, state: FSMContext):
             "quests": quests,
             "result": 0
         }
-        await passing_quiz(message)
+        await QuizStates.passing_quiz.set()
+        await passing_quiz(message, state)
     else:
         await message.answer(text="Oops, please choose one of two variants")
 
 
-async def passing_quiz(message: types.Message):
+async def passing_quiz(message: types.Message, state: FSMContext):
     """Function sending the quiz."""
 
     data = quiz_dict[message.from_user.id]
     if data["num"] == -1:
-        logger.info(msg=f"User {message.from_user.first_name}(@{message.from_user.username}) starts passing the quiz.")
         await message.answer(text="Test will start in", reply_markup=types.ReplyKeyboardRemove())
         for i in range(3, 0, -1):
             await message.answer(text=f"{i}")
-            await asyncio.sleep(1)
+            await asyncio.sleep(0.5)
         data["num"] += 1
-        await passing_quiz(message)
+        await passing_quiz(message, state)
         return
 
     p_quests = data["quests"]
@@ -77,7 +77,7 @@ async def passing_quiz(message: types.Message):
     start_time = time()
 
     while not now_question.poll.is_closed and time() - start_time < 10:
-        await asyncio.sleep(0.1)
+        await asyncio.sleep(0.01)
 
     if data["num"] == 20:
         logger.info(msg=f"User {message.from_user.first_name}(@{message.from_user.username}) passed the quiz.")
@@ -87,30 +87,36 @@ async def passing_quiz(message: types.Message):
         if data["result"] >= 40:
             keyboard = types.ReplyKeyboardMarkup(one_time_keyboard=True, resize_keyboard=True)
             buttons = [
-                types.KeyboardButton(text="Yes, with pleasure"),
-                types.KeyboardButton(text="No, not now")
+                types.KeyboardButton(text="Yeah, with pleasure 😜"),
+                types.KeyboardButton(text="No, not right now")
             ]
             keyboard.add(*buttons)
-            await message.answer(text="Would you like to be respondent?", reply_markup=keyboard)
+            await message.answer(text="Would you like to be respondent\n"
+                                      "and the most active resident of the Innopolis?", reply_markup=keyboard)
             await RespondentStates.wait_for_reply.set()
         else:
             res = requests.put(f"http://localhost:{PORT}/api_users/{message.from_user.id}", json={
                 'is_respondent': 1
             }).json()
             if 'success' in res:
-                await message.answer(text="Unfortunately, you failed the test,\n"
-                                          "but it will be available again soon.", reply_markup=ok_keyboard)
+                logger.info(msg=f"User {message.from_user.first_name}(@{message.from_user.username}) failed the test.")
+                await message.answer(text="Unfortunately 😿 You failed test,\n"
+                                          "that is why we recommend you to walk\n"
+                                          "around of the city, learn something new\n"
+                                          "and retake this test in a week💪🏼🤙🏼", reply_markup=ok_keyboard)
                 # тест должен появляться снова через неделю
                 await CommonUserStates.send_actions.set()
             else:
                 logger.error(msg=f"Can't set is_respondent to 1 "
                                  f"for {message.from_user.first_name}(@{message.from_user.username}).")
                 await message.answer(text="Oops, something went wrong :(")
+                await state.finish()
 
         quiz_dict.pop(message.from_user.id)
         return
 
-    await passing_quiz(message)
+    if await state.get_state() == 'QuizStates:passing_quiz':
+        await passing_quiz(message, state)
 
 
 async def getting_quiz_answer(poll_answer: types.PollAnswer):
@@ -130,3 +136,4 @@ def register_quiz_handlers(dp: Dispatcher):
     logger.info(msg=f"Registering quiz handlers.")
     dp.register_message_handler(reply_on_quiz, state=QuizStates.wait_for_reply)
     dp.register_poll_answer_handler(getting_quiz_answer)
+    dp.register_message_handler(passing_quiz, state=QuizStates.passing_quiz)

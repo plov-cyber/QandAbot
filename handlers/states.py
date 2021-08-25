@@ -4,10 +4,17 @@
 from aiogram.dispatcher.filters.state import State, StatesGroup
 
 
+class CommonStates(StatesGroup):
+    """Common states."""
+
+    react_to_actions = State()
+
+
 class QuizStates(StatesGroup):
     """Quiz states."""
 
     wait_for_reply = State()
+    passing_quiz = State()
 
 
 class RespondentStates(StatesGroup):
@@ -15,14 +22,16 @@ class RespondentStates(StatesGroup):
 
     wait_for_reply = State()
     send_actions = State()
-    react_to_actions = State()
+    send_interactions = State()
+    react_to_inters = State()
 
 
 class CommonUserStates(StatesGroup):
     """States for simple user."""
 
     send_actions = State()
-    react_to_actions = State()
+    send_interactions = State()
+    react_to_inters = State()
 
 
 class FindQuestionStates(StatesGroup):

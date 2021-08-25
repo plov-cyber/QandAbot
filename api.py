@@ -3,6 +3,7 @@
 # Libraries, classes and functions imports
 import os
 
+import requests
 from flask import Flask
 from flask_restful import Api
 
