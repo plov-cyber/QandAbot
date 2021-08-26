@@ -7,7 +7,9 @@ from aiogram import types, Dispatcher
 from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters import Text
 
-from api import PORT, req
+from data import db_session
+from data.QuestionModel import Question
+from data.UserModel import User
 from handlers.common_user_handlers import common_user_send_actions, common_user_send_interactions
 from handlers.respondent_handlers import respondent_send_actions, respondent_send_interactions
 from handlers.states import QuizStates, RespondentStates, CommonUserStates, AskQuestionStates, FindQuestionStates, \
@@ -22,6 +24,10 @@ buttons = [
     types.KeyboardButton(text="I prefer to do it later")
 ]
 keyboard_for_quiz.add(*buttons)
+is_answered_signs = ['❌', '✅']
+
+# Creating session for db.
+session = db_session.create_session()
 
 
 async def cmd_start(message: types.Message, state: FSMContext):
@@ -29,17 +35,19 @@ async def cmd_start(message: types.Message, state: FSMContext):
 
     logger.info(msg=f"User {message.from_user.first_name}(@{message.from_user.username}) sent /start command.")
     await state.finish()
-    user = req.get(f'http://localhost:{PORT}/api_users/{message.from_user.id}').json()
-    if 'user' in user:
+    user = session.query(User).get(message.from_user.id)
+    if user:
         await CommonStates.to_main_menu.set()
         await send_user_to_main_menu(message, state)
     else:
-        req.post(f'http://localhost:{PORT}/api_users', json={
-            'id': message.from_user.id,
-            'username': message.from_user.username,
-            'first_name': message.from_user.first_name,
-            'last_name': message.from_user.last_name if message.from_user.last_name else ""
-        }).json()
+        user = User(
+            id=message.from_user.id,
+            username=message.from_user.username,
+            first_name=message.from_user.first_name,
+            last_name=message.from_user.last_name
+        )
+        session.add(user)
+        session.commit()
         logger.info(msg=f"User {message.from_user.first_name}(@{message.from_user.username}) successfully registered.")
         user_name = message.from_user.first_name + ' ' + message.from_user.last_name \
             if message.from_user.last_name else message.from_user.first_name
@@ -75,15 +83,14 @@ async def send_user_to_main_menu(message: types.Message, state: FSMContext):
     """Sends user to main menu."""
 
     logger.info(msg=f"User {message.from_user.first_name}(@{message.from_user.username}) is in main menu now.")
-    user = req.get(f"http://localhost:{PORT}/api_users/{message.from_user.id}").json()
-    if "message" in user:
+    user = session.query(User).get(message.from_user.id)
+    if not user:
         logger.error(msg=f"Can't get user {message.from_user.first_name}(@{message.from_user.username})")
         await message.answer(text="Oops, something went wrong :(",
                              reply_markup=types.ReplyKeyboardRemove())
         await state.finish()
     else:
-        user = user['user']
-        stat = user['is_respondent']
+        stat = user.is_respondent
         if stat in [0, 1, 2]:
             await CommonUserStates.send_actions.set()
             await common_user_send_actions(message)
@@ -98,16 +105,15 @@ async def react_to_actions(message: types.Message, state: FSMContext):
     text = message.text
     if text == "Interaction":
         logger.info(msg=f"User {message.from_user.first_name}(@{message.from_user.username}) opened Interaction menu.")
-        user = req.get(f'http://localhost:{PORT}/api_users/{message.from_user.id}').json()
-        if 'message' in user:
+        user = session.query(User).get(message.from_user.id)
+        if not user:
             logger.error(msg=f"Can't find user {message.from_user.first_name}(@{message.from_user.username}).")
             await message.answer(text="Oops, something went wrong :(",
                                  reply_markup=types.ReplyKeyboardRemove())
             await state.finish()
             return
 
-        user = user['user']
-        stat = user['is_respondent']
+        stat = user.is_respondent
         if stat in [0, 1, 2]:
             await CommonUserStates.send_interactions.set()
             await common_user_send_interactions(message)
@@ -130,10 +136,30 @@ async def react_to_actions(message: types.Message, state: FSMContext):
 async def show_questions(message: types.Message, state: FSMContext):
     """Showing user's questions."""
 
-    logger.info(msg=f"Showing user's {message.from_user.first_name}(@{message.from_user.username}) questions.")
-    await CommonStates.show_questions.set()
-    await message.answer(text="It's not realised yet :(")
-    await state.finish()
+    await state.reset_data()
+    questions = session.query(Question).filter(Question.from_user_id == message.from_user.id).all()
+    size = len(questions)
+    if size:
+        logger.info(msg=f"Showing user's {message.from_user.first_name}(@{message.from_user.username}) questions.")
+        buttons = [
+            types.InlineKeyboardButton(text='<--', callback_data="previous_question"),
+            types.InlineKeyboardButton(text=f'1/{size}', callback_data="question_num"),
+            types.InlineKeyboardButton(text='-->', callback_data="next_question"),
+        ]
+        if questions[0].is_answered:
+            buttons.append(types.InlineKeyboardButton(text="Show answer", callback_data="show_answer"))
+        showing_questions_keyboard = types.InlineKeyboardMarkup(row_width=3)
+        showing_questions_keyboard.add(*buttons)
+        await state.update_data(index=0, questions=questions)
+        await message.answer(text=f"Question:\n"
+                                  f"{questions[0].text}\n"
+                                  f"Answered: {is_answered_signs[questions[0].is_answered]}",
+                             reply_markup=showing_questions_keyboard)
+        await CommonStates.show_questions.set()
+    else:
+        await message.answer(text="Sorry, but there are no questions.")
+        await CommonStates.to_main_menu.set()
+        await send_user_to_main_menu(message, state)
 
 
 def register_common_handlers(dp: Dispatcher):
@@ -149,4 +175,3 @@ def register_common_handlers(dp: Dispatcher):
                                 state=CommonUserStates.react_to_inters)
     dp.register_message_handler(show_questions, Text(equals="My questions"),
                                 state=RespondentStates.react_to_inters)
-    dp.register_message_handler(show_questions, state=CommonStates.show_questions)

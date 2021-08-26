@@ -65,7 +65,7 @@ QUIZ = {
     "What are working hours of sport complex?": (
         "7:00 - 23:00", ["7:00 - 23:00", "6:00 - 21:00", "8:00 - 22:00", "9:00 - 23:00"]),
     "Whats the average cost of self-driving taxi?": (
-        "totally free", ["100~120 rub", "75~100 rub", "Totally free", "140~160 rub"]),
+        "Totally free", ["100~120 rub", "75~100 rub", "Totally free", "140~160 rub"]),
     "Where is the biggest assortment of household goods?": (
         "'Магнит косметик'", ["'Магнит косметик'", "'Пятерочка'", "ZimaLeto", "'Бахатле'"]),
     "Which company has not special license for students?": ("Yandex", ["Yandex", "OneDrive", "Notion", "JetBrains"]),

@@ -6,7 +6,8 @@ import logging
 from aiogram import types, Dispatcher
 from aiogram.dispatcher import FSMContext
 
-from api import PORT, req
+from data import db_session
+from data.UserModel import User
 from handlers.states import RespondentStates, CommonStates
 
 logger = logging.getLogger(__name__)
@@ -17,41 +18,31 @@ ok_keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=
                                             types.KeyboardButton(text="OK")
                                         ]])
 
+# Creating session for db.
+session = db_session.create_session()
+
 
 async def reply_on_respondent(message: types.Message, state: FSMContext):
     """Different replies about respondent."""
 
     text = message.text
+    user = session.query(User).get(message.from_user.id)
     if text == "Yeah, with pleasure 😜":
-        res = req.put(f"http://localhost:{PORT}/api_users/{message.from_user.id}", json={
-            'is_respondent': 3
-        }).json()
-        if 'success' in res:
-            logger.info(
-                f"User {message.from_user.first_name}(@{message.from_user.username}) became a respondent.")
-            await message.answer(text="You are respondent from this time, so be sure to check your mail sometimes.",
-                                 reply_markup=ok_keyboard)
-            await RespondentStates.send_actions.set()
-        else:
-            logger.error(msg=f"Can't set is_respondent to 3 "
-                             f"for {message.from_user.first_name}(@{message.from_user.username}).")
-            await message.answer(text="Oops, something went wrong :(",
-                                 reply_markup=types.ReplyKeyboardRemove())
-            await state.finish()
+        user.is_respondent = 3
+        session.merge(user)
+        session.commit()
+        logger.info(
+            f"User {message.from_user.first_name}(@{message.from_user.username}) became a respondent.")
+        await message.answer(text="You are respondent from this time, so be sure to check your mail sometimes.",
+                             reply_markup=ok_keyboard)
+        await RespondentStates.send_actions.set()
     elif text == "No, not right now":
-        res = req.put(f"http://localhost:{PORT}/api_users/{message.from_user.id}", json={
-            'is_respondent': 2
-        }).json()
-        if 'success' in res:
-            await message.answer(text="Next time, you will be able to become a responder without passing the test.",
-                                 reply_markup=ok_keyboard)
-            await RespondentStates.send_actions.set()
-        else:
-            logger.error(msg=f"Can't set is_respondent to 2 "
-                             f"for {message.from_user.first_name}(@{message.from_user.username}).")
-            await message.answer(text="Oops, something went wrong :(",
-                                 reply_markup=types.ReplyKeyboardRemove())
-            await state.finish()
+        user.is_respondent = 2
+        session.merge(user)
+        session.commit()
+        await message.answer(text="Next time, you will be able to become a responder without passing the test.",
+                             reply_markup=ok_keyboard)
+        await RespondentStates.send_actions.set()
     else:
         await message.answer(text="Oops, please choose one of two variants")
 

@@ -19,9 +19,6 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = SECRET_KEY
 PORT = int(os.environ.get("PORT", 80))
 
-# Initializing database
-db_session.global_init('db/data.sqlite')
-
 # Creating api and adding resources
 api = Api(app)
 api.add_resource(UserResource, '/api_users/<int:user_id>')

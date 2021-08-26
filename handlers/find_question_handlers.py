@@ -13,8 +13,7 @@ from handlers.states import FindQuestionStates, CommonStates
 
 logger = logging.getLogger(__name__)
 
-user_data = {}
-showing_questions_keyboard = types.InlineKeyboardMarkup(row_width=3)
+is_answered_signs = ['❌', '✅']
 
 
 async def get_hashtags(message: types.Message, state: FSMContext):
@@ -37,20 +36,25 @@ async def get_hashtags(message: types.Message, state: FSMContext):
         if suit_hashtags:
             suit_questions.append((q, len(suit_hashtags)))
     suit_questions = list(map(lambda x: x[0], sorted(suit_questions, key=lambda x: x[1])))  # list of questions
-    user_data[message.from_user.id] = (0, suit_questions)
     size = len(suit_questions)
-    buttons = [
-        types.InlineKeyboardButton(text='<--', callback_data="previous_question"),
-        types.InlineKeyboardButton(text=f'1/{size}', callback_data="question_num"),
-        types.InlineKeyboardButton(text='-->', callback_data="next_question"),
-        types.InlineKeyboardButton(text='Show answer', callback_data="show_answer")
-    ]
-    showing_questions_keyboard.add(*buttons)
+    await state.reset_data()
     if size:
         logger.info(
             msg=f"Showing questions to "
                 f"user {message.from_user.first_name}(@{message.from_user.username}) for hashtags {hashtags}.")
-        await message.answer(text=f"{suit_questions[0].text}",
+        buttons = [
+            types.InlineKeyboardButton(text='<--', callback_data="previous_question"),
+            types.InlineKeyboardButton(text=f'1/{size}', callback_data="question_num"),
+            types.InlineKeyboardButton(text='-->', callback_data="next_question"),
+        ]
+        if suit_questions[0].is_answered:
+            buttons.append(types.InlineKeyboardButton(text="Show answer", callback_data="show_answer"))
+        showing_questions_keyboard = types.InlineKeyboardMarkup(row_width=3)
+        showing_questions_keyboard.add(*buttons)
+        await state.update_data(index=0, questions=suit_questions)
+        await message.answer(text=f"Question:\n"
+                                  f"{suit_questions[0].text}\n"
+                                  f"Answered: {is_answered_signs[suit_questions[0].is_answered]}",
                              reply_markup=showing_questions_keyboard)
         await FindQuestionStates.show_questions.set()
     else:

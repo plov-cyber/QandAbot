@@ -5,9 +5,9 @@ import logging
 
 from aiogram import types, Dispatcher
 from aiogram.dispatcher import FSMContext
-from aiogram.dispatcher.filters import Text
 
-from api import PORT, req
+from data import db_session
+from data.UserModel import User
 from handlers.states import CommonUserStates, CommonStates, QuizStates, RespondentStates
 
 logger = logging.getLogger(__name__)
@@ -24,6 +24,9 @@ ok_keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=
                                         keyboard=[[
                                             types.KeyboardButton(text="OK")
                                         ]])
+
+# Creating session for db.
+session = db_session.create_session()
 
 
 async def common_user_send_interactions(message: types.Message):
@@ -47,15 +50,14 @@ async def common_user_react_to_inters(message: types.Message, state: FSMContext)
 
     text = message.text
     if text == 'Become respondent':
-        user = req.get(f"http://localhost:{PORT}/api_users/{message.from_user.id}").json()
-        if "message" in user:
+        user = session.query(User).get(message.from_user.id)
+        if not user:
             logger.error(msg=f"Can't get user {message.from_user.first_name}(@{message.from_user.username})")
             await message.answer(text="Oops, something went wrong :(",
                                  reply_markup=types.ReplyKeyboardRemove())
             await state.finish()
         else:
-            user = user['user']
-            stat = user['is_respondent']
+            stat = user.is_respondent
             responses = ["To become a respondent you should pass the test.",
                          "To become a respondent you should take the test again."]
             if stat in [0, 1]:
@@ -65,21 +67,14 @@ async def common_user_react_to_inters(message: types.Message, state: FSMContext)
                                      reply_markup=keyboard_for_quiz)
                 await QuizStates.wait_for_reply.set()
             elif stat == 2:
-                res = req.put(f"http://localhost:{PORT}/api_users/{message.from_user.id}", json={
-                    'is_respondent': 3
-                }).json()
-                if 'success' in res:
-                    logger.info(
-                        f"User {message.from_user.first_name}(@{message.from_user.username}) became a respondent.")
-                    await message.answer(text="You already passed the test and can start answering the questions.",
-                                         reply_markup=ok_keyboard)
-                    await RespondentStates.send_actions.set()
-                else:
-                    logger.error(msg=f"Can't set is_respondent to 3 "
-                                     f"for {message.from_user.first_name}(@{message.from_user.username}).")
-                    await message.answer(text="Oops, something went wrong :(",
-                                         reply_markup=types.ReplyKeyboardRemove())
-                    await state.finish()
+                user.is_respondent = 3
+                session.merge(user)
+                session.commit()
+                logger.info(
+                    f"User {message.from_user.first_name}(@{message.from_user.username}) became a respondent.")
+                await message.answer(text="You already passed the test and can start answering the questions.",
+                                     reply_markup=ok_keyboard)
+                await RespondentStates.send_actions.set()
 
 
 async def common_user_send_actions(message: types.Message):

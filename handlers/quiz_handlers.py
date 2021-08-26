@@ -9,7 +9,8 @@ from random import shuffle
 from aiogram import Dispatcher, types
 from aiogram.dispatcher import FSMContext
 
-from api import PORT, req
+from data import db_session
+from data.UserModel import User
 from handlers.common_handlers import send_user_to_main_menu
 from handlers.quiz_text import QUIZ
 from handlers.states import RespondentStates, QuizStates, CommonUserStates, CommonStates
@@ -23,6 +24,9 @@ ok_keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=
                                         keyboard=[[
                                             types.KeyboardButton(text="OK")
                                         ]])
+
+# Creating session for db.
+session = db_session.create_session()
 
 
 async def reply_on_quiz(message: types.Message, state: FSMContext):
@@ -93,22 +97,17 @@ async def passing_quiz(message: types.Message, state: FSMContext):
                                       "and the most active resident of the Innopolis?", reply_markup=keyboard)
             await RespondentStates.wait_for_reply.set()
         else:
-            res = req.put(f"http://localhost:{PORT}/api_users/{message.from_user.id}", json={
-                'is_respondent': 1
-            }).json()
-            if 'success' in res:
-                logger.info(msg=f"User {message.from_user.first_name}(@{message.from_user.username}) failed the test.")
-                await message.answer(text="Unfortunately 😿 You failed test,\n"
-                                          "that is why we recommend you to walk\n"
-                                          "around of the city, learn something new\n"
-                                          "and retake this test in a week💪🏼🤙🏼", reply_markup=ok_keyboard)
-                # тест должен появляться снова через неделю
-                await CommonUserStates.send_actions.set()
-            else:
-                logger.error(msg=f"Can't set is_respondent to 1 "
-                                 f"for {message.from_user.first_name}(@{message.from_user.username}).")
-                await message.answer(text="Oops, something went wrong :(")
-                await state.finish()
+            user = session.query(User).get(message.from_user.id)
+            user.is_respondent = 1
+            session.merge(user)
+            session.commit()
+            logger.info(msg=f"User {message.from_user.first_name}(@{message.from_user.username}) failed the test.")
+            await message.answer(text="Unfortunately 😿 You failed test,\n"
+                                      "that is why we recommend you to walk\n"
+                                      "around of the city, learn something new\n"
+                                      "and retake this test in a week💪🏼🤙🏼", reply_markup=ok_keyboard)
+            # тест должен появляться снова через неделю
+            await CommonUserStates.send_actions.set()
 
         quiz_dict.pop(message.from_user.id)
         return

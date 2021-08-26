@@ -5,9 +5,9 @@ from sqlalchemy_serializer import SerializerMixin
 from .db_session import SqlAlchemyBase
 
 question_to_hashtag = sqlalchemy.Table('question_to_hashtag', SqlAlchemyBase.metadata,
-                                       sqlalchemy.Column('question', sqlalchemy.BigInteger,
+                                       sqlalchemy.Column('question', sqlalchemy.Integer,
                                                          sqlalchemy.ForeignKey('questions.id'), primary_key=True),
-                                       sqlalchemy.Column('hashtag', sqlalchemy.BigInteger,
+                                       sqlalchemy.Column('hashtag', sqlalchemy.Integer,
                                                          sqlalchemy.ForeignKey('hashtags.id'), primary_key=True))
 
 

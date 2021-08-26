@@ -10,6 +10,7 @@ class CommonStates(StatesGroup):
     react_to_actions = State()
     show_questions = State()
     to_main_menu = State()
+    load_questions = State()
 
 
 class QuizStates(StatesGroup):
