@@ -5,14 +5,14 @@ import logging
 
 from aiogram import types, Dispatcher
 from aiogram.dispatcher import FSMContext
+from aiogram.dispatcher.filters import Text
 
 from api import PORT, req
-from handlers.quiz_handlers import ok_keyboard
 from handlers.states import CommonUserStates, CommonStates, QuizStates, RespondentStates
 
 logger = logging.getLogger(__name__)
 
-# Keyboard asking about passing quiz.
+# Keyboards.
 keyboard_for_quiz = types.ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True)
 buttons = [
     types.KeyboardButton(text="Give me this test!"),
@@ -20,10 +20,16 @@ buttons = [
 ]
 keyboard_for_quiz.add(*buttons)
 
+ok_keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True,
+                                        keyboard=[[
+                                            types.KeyboardButton(text="OK")
+                                        ]])
+
 
 async def common_user_send_interactions(message: types.Message):
     """Interactions for common user."""
 
+    await CommonUserStates.send_interactions.set()
     keyboard_for_interact = types.ReplyKeyboardMarkup(one_time_keyboard=True, resize_keyboard=True,
                                                       row_width=1)
     buttons = [
@@ -37,7 +43,7 @@ async def common_user_send_interactions(message: types.Message):
 
 
 async def common_user_react_to_inters(message: types.Message, state: FSMContext):
-    """Reacts to different buttons."""
+    """Reacts to different interactions."""
 
     text = message.text
     if text == 'Become respondent':
@@ -74,8 +80,6 @@ async def common_user_react_to_inters(message: types.Message, state: FSMContext)
                     await message.answer(text="Oops, something went wrong :(",
                                          reply_markup=types.ReplyKeyboardRemove())
                     await state.finish()
-    elif text == "My questions":
-        pass
 
 
 async def common_user_send_actions(message: types.Message):

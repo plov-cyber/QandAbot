@@ -9,7 +9,7 @@ from aiogram.dispatcher import FSMContext
 from data import db_session
 from data.QuestionModel import Question
 from handlers.common_handlers import send_user_to_main_menu
-from handlers.states import FindQuestionStates
+from handlers.states import FindQuestionStates, CommonStates
 
 logger = logging.getLogger(__name__)
 
@@ -47,12 +47,16 @@ async def get_hashtags(message: types.Message, state: FSMContext):
     ]
     showing_questions_keyboard.add(*buttons)
     if size:
+        logger.info(
+            msg=f"Showing questions to "
+                f"user {message.from_user.first_name}(@{message.from_user.username}) for hashtags {hashtags}.")
         await message.answer(text=f"{suit_questions[0].text}",
                              reply_markup=showing_questions_keyboard)
+        await FindQuestionStates.show_questions.set()
     else:
         await message.answer(text="Sorry, but there are no questions.")
-        await state.finish()
-        await send_user_to_main_menu(message)
+        await CommonStates.to_main_menu.set()
+        await send_user_to_main_menu(message, state)
 
 
 def register_find_question_handlers(dp: Dispatcher):

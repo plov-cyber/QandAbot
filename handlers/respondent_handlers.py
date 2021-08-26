@@ -7,10 +7,15 @@ from aiogram import types, Dispatcher
 from aiogram.dispatcher import FSMContext
 
 from api import PORT, req
-from handlers.quiz_handlers import ok_keyboard
 from handlers.states import RespondentStates, CommonStates
 
 logger = logging.getLogger(__name__)
+
+# Keyboards.
+ok_keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True,
+                                        keyboard=[[
+                                            types.KeyboardButton(text="OK")
+                                        ]])
 
 
 async def reply_on_respondent(message: types.Message, state: FSMContext):
@@ -54,7 +59,27 @@ async def reply_on_respondent(message: types.Message, state: FSMContext):
 async def respondent_send_interactions(message: types.Message):
     """Interactions for respondent."""
 
-    pass
+    keyboard_for_interact = types.ReplyKeyboardMarkup(one_time_keyboard=True, resize_keyboard=True,
+                                                      row_width=1)
+    buttons = [
+        types.KeyboardButton(text="My questions"),
+        types.KeyboardButton(text="Available questions"),
+        types.KeyboardButton(text="Requests")
+    ]
+    keyboard_for_interact.add(*buttons)
+    await message.answer(text="Choose what you want to do:",
+                         reply_markup=keyboard_for_interact)
+    await RespondentStates.react_to_inters.set()
+
+
+async def respondent_react_to_inters(message: types.Message, state: FSMContext):
+    """Reacts to different interactions."""
+
+    text = message.text
+    if text == "Available questions":
+        pass
+    elif text == "Requests":
+        pass
 
 
 async def respondent_send_actions(message: types.Message):
@@ -93,3 +118,4 @@ def register_respondent_handlers(dp: Dispatcher):
     dp.register_message_handler(reply_on_respondent, state=RespondentStates.wait_for_reply)
     dp.register_message_handler(respondent_send_actions, state=RespondentStates.send_actions)
     dp.register_message_handler(respondent_send_interactions, state=RespondentStates.send_interactions)
+    dp.register_message_handler(respondent_react_to_inters, state=RespondentStates.react_to_inters)

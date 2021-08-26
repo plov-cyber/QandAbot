@@ -5,6 +5,7 @@ import logging
 
 from aiogram import types, Dispatcher
 from aiogram.dispatcher import FSMContext
+from aiogram.dispatcher.filters import Text
 
 from api import PORT, req
 from handlers.common_user_handlers import common_user_send_actions, common_user_send_interactions
@@ -30,7 +31,8 @@ async def cmd_start(message: types.Message, state: FSMContext):
     await state.finish()
     user = req.get(f'http://localhost:{PORT}/api_users/{message.from_user.id}').json()
     if 'user' in user:
-        await send_user_to_main_menu(message)
+        await CommonStates.to_main_menu.set()
+        await send_user_to_main_menu(message, state)
     else:
         req.post(f'http://localhost:{PORT}/api_users', json={
             'id': message.from_user.id,
@@ -61,14 +63,15 @@ async def cmd_help(message: types.Message, state: FSMContext):
                               "telegram: @RRMOLL\n", reply_markup=types.ReplyKeyboardRemove())
 
 
-async def cmd_cancel(message: types.Message):
+async def cmd_cancel(message: types.Message, state: FSMContext):
     """Function triggers on /cancel."""
 
     logger.info(msg=f"User {message.from_user.first_name}(@{message.from_user.username}) sent /cancel command.")
-    await send_user_to_main_menu(message)
+    await CommonStates.to_main_menu.set()
+    await send_user_to_main_menu(message, state)
 
 
-async def send_user_to_main_menu(message: types.Message):
+async def send_user_to_main_menu(message: types.Message, state: FSMContext):
     """Sends user to main menu."""
 
     logger.info(msg=f"User {message.from_user.first_name}(@{message.from_user.username}) is in main menu now.")
@@ -77,6 +80,7 @@ async def send_user_to_main_menu(message: types.Message):
         logger.error(msg=f"Can't get user {message.from_user.first_name}(@{message.from_user.username})")
         await message.answer(text="Oops, something went wrong :(",
                              reply_markup=types.ReplyKeyboardRemove())
+        await state.finish()
     else:
         user = user['user']
         stat = user['is_respondent']
@@ -123,6 +127,15 @@ async def react_to_actions(message: types.Message, state: FSMContext):
         await FindQuestionStates.getting_hashtags.set()
 
 
+async def show_questions(message: types.Message, state: FSMContext):
+    """Showing user's questions."""
+
+    logger.info(msg=f"Showing user's {message.from_user.first_name}(@{message.from_user.username}) questions.")
+    await CommonStates.show_questions.set()
+    await message.answer(text="It's not realised yet :(")
+    await state.finish()
+
+
 def register_common_handlers(dp: Dispatcher):
     """Registers all common_handlers to dispatcher."""
 
@@ -131,3 +144,9 @@ def register_common_handlers(dp: Dispatcher):
     dp.register_message_handler(cmd_help, commands='help', state='*')
     dp.register_message_handler(cmd_cancel, commands='cancel', state="*")
     dp.register_message_handler(react_to_actions, state=CommonStates.react_to_actions)
+    dp.register_message_handler(send_user_to_main_menu, state=CommonStates.to_main_menu)
+    dp.register_message_handler(show_questions, Text(equals="My questions"),
+                                state=CommonUserStates.react_to_inters)
+    dp.register_message_handler(show_questions, Text(equals="My questions"),
+                                state=RespondentStates.react_to_inters)
+    dp.register_message_handler(show_questions, state=CommonStates.show_questions)

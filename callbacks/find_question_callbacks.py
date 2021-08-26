@@ -11,8 +11,8 @@ from handlers.states import FindQuestionStates
 logger = logging.getLogger(__name__)
 
 
-async def swipe_question(callback: types.CallbackQuery):
-    """Callback for swiping questions."""
+async def swipe_found_question(callback: types.CallbackQuery):
+    """Callback for swiping found questions."""
 
     i, questions = user_data.get(callback.from_user.id)
     size = len(questions)
@@ -47,4 +47,4 @@ def register_find_question_callbacks(dp: Dispatcher):
     """Registers all common callbacks to dispatcher."""
 
     logger.info(msg="Registering common callbacks.")
-    dp.register_callback_query_handler(swipe_question, state=FindQuestionStates.getting_hashtags)
+    dp.register_callback_query_handler(swipe_found_question, state=FindQuestionStates.show_questions)

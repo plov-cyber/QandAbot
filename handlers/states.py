@@ -8,6 +8,8 @@ class CommonStates(StatesGroup):
     """Common states."""
 
     react_to_actions = State()
+    show_questions = State()
+    to_main_menu = State()
 
 
 class QuizStates(StatesGroup):
@@ -38,6 +40,7 @@ class FindQuestionStates(StatesGroup):
     """States for finding questions."""
 
     getting_hashtags = State()
+    show_questions = State()
 
 
 class AskQuestionStates(StatesGroup):

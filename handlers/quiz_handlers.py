@@ -10,8 +10,9 @@ from aiogram import Dispatcher, types
 from aiogram.dispatcher import FSMContext
 
 from api import PORT, req
+from handlers.common_handlers import send_user_to_main_menu
 from handlers.quiz_text import QUIZ
-from handlers.states import RespondentStates, QuizStates, CommonUserStates
+from handlers.states import RespondentStates, QuizStates, CommonUserStates, CommonStates
 
 logger = logging.getLogger(__name__)
 
@@ -30,10 +31,8 @@ async def reply_on_quiz(message: types.Message, state: FSMContext):
     text = message.text
     if text == "I prefer to do it later":
         logger.info(msg=f"User {message.from_user.first_name}(@{message.from_user.username}) skipped the test.")
-        await state.finish()
-        await message.answer(text="You can always return to the test to be able to answer questions.",
-                             reply_markup=ok_keyboard)
-        await CommonUserStates.send_actions.set()
+        await CommonStates.to_main_menu.set()
+        await send_user_to_main_menu(message, state)
     elif text == "Give me this test!":
         logger.info(msg=f"User {message.from_user.first_name}(@{message.from_user.username}) starts passing the quiz.")
         quests = list(QUIZ.keys())
