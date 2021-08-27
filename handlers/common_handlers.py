@@ -1,6 +1,7 @@
 """Common handlers."""
 
 # Libraries, classes and functions imports
+import asyncio
 import logging
 
 from aiogram import types, Dispatcher
@@ -152,12 +153,13 @@ async def show_questions(message: types.Message, state: FSMContext):
         showing_questions_keyboard.add(*buttons)
         await state.update_data(index=0, questions=questions)
         await message.answer(text=f"Question:\n"
-                                  f"{questions[0].text}\n"
+                                  f"{questions[0].text}\n\n"
                                   f"Answered: {is_answered_signs[questions[0].is_answered]}",
                              reply_markup=showing_questions_keyboard)
         await CommonStates.show_questions.set()
     else:
         await message.answer(text="Sorry, but there are no questions.")
+        await asyncio.sleep(0.5)
         await CommonStates.to_main_menu.set()
         await send_user_to_main_menu(message, state)
 

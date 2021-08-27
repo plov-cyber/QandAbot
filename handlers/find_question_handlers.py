@@ -53,7 +53,7 @@ async def get_hashtags(message: types.Message, state: FSMContext):
         showing_questions_keyboard.add(*buttons)
         await state.update_data(index=0, questions=suit_questions)
         await message.answer(text=f"Question:\n"
-                                  f"{suit_questions[0].text}\n"
+                                  f"{suit_questions[0].text}\n\n"
                                   f"Answered: {is_answered_signs[suit_questions[0].is_answered]}",
                              reply_markup=showing_questions_keyboard)
         await FindQuestionStates.show_questions.set()

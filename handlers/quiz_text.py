@@ -73,5 +73,5 @@ QUIZ = {
         "@InnopolisHelp", ["@InnopolisHelp", "@Inno_Self-Driving", "@Yandex_Self-Driving", "@InnoHelpBot"]),
     "In what year was Innopolis founded? ": ("2012 year", ["2010 year", "2011 year", "2012 year", "2013 year"]),
     "How to buy tickets to Innopolis_Cinema? ": ("By website", ["By website", "By cash or credit card in the cinema",
-                                                                "In the Cinema channel", "In the Cinema channel"])
+                                                                "In the Cinema channel", "In the Cinema bot"])
 }
