@@ -19,6 +19,7 @@ from handlers.common_user_handlers import register_common_user_handlers
 from handlers.find_question_handlers import register_find_question_handlers
 from handlers.quiz_handlers import register_quiz_handlers
 from handlers.respondent_handlers import register_respondent_handlers
+from callbacks.respondent_callbacks import register_respondent_callbacks
 
 # Creating bot, logger and dispatcher
 logging.basicConfig(level=logging.INFO,
@@ -37,6 +38,7 @@ register_ask_question_handlers(dp)
 
 register_common_callbacks(dp)
 register_find_question_callbacks(dp)
+register_respondent_callbacks(dp)
 
 
 async def shutdown(dp: Dispatcher):

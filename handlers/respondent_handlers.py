@@ -1,14 +1,17 @@
 """Respondent handlers."""
 
 # Libraries, classes and functions imports
+import asyncio
 import logging
 
 from aiogram import types, Dispatcher
 from aiogram.dispatcher import FSMContext
 
 from data import db_session
+from data.QuestionModel import Question
 from data.UserModel import User
 from handlers.states import RespondentStates, CommonStates
+from helpers import find_questions_by_hashtags
 
 logger = logging.getLogger(__name__)
 
@@ -47,32 +50,6 @@ async def reply_on_respondent(message: types.Message, state: FSMContext):
         await message.answer(text="Oops, please choose one of two variants")
 
 
-async def respondent_send_interactions(message: types.Message):
-    """Interactions for respondent."""
-
-    keyboard_for_interact = types.ReplyKeyboardMarkup(one_time_keyboard=True, resize_keyboard=True,
-                                                      row_width=1)
-    buttons = [
-        types.KeyboardButton(text="My questions"),
-        types.KeyboardButton(text="Available questions"),
-        types.KeyboardButton(text="Requests")
-    ]
-    keyboard_for_interact.add(*buttons)
-    await message.answer(text="Choose what you want to do:",
-                         reply_markup=keyboard_for_interact)
-    await RespondentStates.react_to_inters.set()
-
-
-async def respondent_react_to_inters(message: types.Message, state: FSMContext):
-    """Reacts to different interactions."""
-
-    text = message.text
-    if text == "Available questions":
-        pass
-    elif text == "Requests":
-        pass
-
-
 async def respondent_send_actions(message: types.Message):
     """Actions for respondent."""
 
@@ -102,6 +79,104 @@ async def respondent_send_actions(message: types.Message):
     await CommonStates.react_to_actions.set()
 
 
+async def respondent_send_interactions(message: types.Message):
+    """Interactions for respondent."""
+
+    keyboard_for_interact = types.ReplyKeyboardMarkup(one_time_keyboard=True, resize_keyboard=True,
+                                                      row_width=1)
+    buttons = [
+        types.KeyboardButton(text="My questions"),
+        types.KeyboardButton(text="My answers"),
+        types.KeyboardButton(text="Available questions"),
+        types.KeyboardButton(text="Requests")
+    ]
+    keyboard_for_interact.add(*buttons)
+    await message.answer(text="Choose what you want to do:",
+                         reply_markup=keyboard_for_interact)
+    await RespondentStates.react_to_inters.set()
+
+
+async def respondent_react_to_inters(message: types.Message):
+    """Reacts to different interactions."""
+
+    text = message.text
+    if text == "My answers":
+        pass
+    elif text == "Available questions":
+        keyboard = types.ReplyKeyboardMarkup(row_width=1, one_time_keyboard=True, resize_keyboard=True)
+        buttons = [
+            types.KeyboardButton(text="Find by #"),
+            types.KeyboardButton(text="Scroll all questions")
+        ]
+        keyboard.add(*buttons)
+        await message.answer(text="Do you want to find question by # or scroll all questions?",
+                             reply_markup=keyboard)
+        await RespondentStates.ask_for_available_questions.set()
+    elif text == "Requests":
+        pass
+
+
+async def respondent_ask_for_available_questions(message: types.Message, state: FSMContext):
+    """Asks respondent about how to find available questions."""
+
+    text = message.text
+    if text == "Find by #":
+        await message.answer(text="Nice)) The most popular topics nowadays are:\n"
+                                  "#dorm\n"
+                                  "#university\n"
+                                  "#lecture\n"
+                                  "#professor", reply_markup=types.ReplyKeyboardRemove())
+        await message.answer(text="💁🏽‍♂️Sand me plz the # in which category you want to get questions")
+        await RespondentStates.show_available_questions.set()
+    elif text == "Scroll all questions":
+        await respondent_show_available_questions(message, state)
+        await RespondentStates.show_available_questions.set()
+
+
+async def respondent_show_available_questions(message: types.Message, state: FSMContext):
+    """Shows available questions to respondent."""
+
+    await state.reset_data()
+
+    text = message.text
+    if text == "Scroll all questions":
+        questions = session.query(Question).filter(Question.is_answered == 0).all()
+    elif text[0] == "#":
+        hashtags = [h.strip() for h in text[1:].lower().split("#")]
+        questions = list(filter(lambda x: not x.is_answered, find_questions_by_hashtags(hashtags)))
+    else:
+        await message.answer(text="Please write hashtags like this: #hashtag1#hashtag2...")
+        return
+    size = len(questions)
+    if size:
+        logger.info(msg=f"Showing available questions to respondent "
+                        f"{message.from_user.first_name}(@{message.from_user.username}).")
+        buttons = [
+            types.InlineKeyboardButton(text='<--', callback_data="previous_question"),
+            types.InlineKeyboardButton(text=f'1/{size}', callback_data="question_num"),
+            types.InlineKeyboardButton(text='-->', callback_data="next_question"),
+            types.InlineKeyboardButton(text='Give answer', callback_data='give_answer')
+        ]
+        available_questions_keyboard = types.InlineKeyboardMarkup(row_width=3)
+        available_questions_keyboard.add(*buttons)
+        await state.update_data(index=0, questions=questions)
+        await message.answer(text=f"Question:\n"
+                                  f"{questions[0].text}\n\n",
+                             reply_markup=available_questions_keyboard)
+    else:
+        await message.answer(text="Sorry, but there are no questions.")
+        await asyncio.sleep(0.5)
+        await RespondentStates.send_interactions.set()
+        await respondent_send_interactions(message)
+
+
+async def show_answers(message: types.Message):
+    """Shows respondent's answers."""
+
+    logger.info(msg=f"Showing respondent's {message.from_user.first_name}(@{message.from_user.username}) answers.")
+    await message.answer(text="There's nothing yet :(")
+
+
 def register_respondent_handlers(dp: Dispatcher):
     """Registers all respondent_handlers to dispatcher."""
 
@@ -110,3 +185,6 @@ def register_respondent_handlers(dp: Dispatcher):
     dp.register_message_handler(respondent_send_actions, state=RespondentStates.send_actions)
     dp.register_message_handler(respondent_send_interactions, state=RespondentStates.send_interactions)
     dp.register_message_handler(respondent_react_to_inters, state=RespondentStates.react_to_inters)
+    dp.register_message_handler(respondent_ask_for_available_questions,
+                                state=RespondentStates.ask_for_available_questions)
+    dp.register_message_handler(respondent_show_available_questions, state=RespondentStates.show_available_questions)

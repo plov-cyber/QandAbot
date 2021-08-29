@@ -6,10 +6,9 @@ import logging
 from aiogram import types, Dispatcher
 from aiogram.dispatcher import FSMContext
 
-from data import db_session
-from data.QuestionModel import Question
 from handlers.common_handlers import send_user_to_main_menu
 from handlers.states import FindQuestionStates, CommonStates
+from helpers import find_questions_by_hashtags
 
 logger = logging.getLogger(__name__)
 
@@ -24,18 +23,10 @@ async def get_hashtags(message: types.Message, state: FSMContext):
         await message.answer(text="Please write hashtags like this: #hashtag1#hashtag2...")
         return
 
-    hashtags = hashtags[1:].lower().split('#')
+    hashtags = [h.strip() for h in hashtags[1:].lower().split('#')]
     logger.info(msg=f"Got hashtags from user {message.from_user.first_name}(@{message.from_user.username}).")
 
-    session = db_session.create_session()
-    questions = session.query(Question).all()
-    suit_questions = []
-    for q in questions:
-        q_hashs = [h.text for h in q.hashtags]
-        suit_hashtags = list(set(q_hashs) & set(hashtags))
-        if suit_hashtags:
-            suit_questions.append((q, len(suit_hashtags)))
-    suit_questions = list(map(lambda x: x[0], sorted(suit_questions, key=lambda x: x[1])))  # list of questions
+    suit_questions = find_questions_by_hashtags(hashtags)
     size = len(suit_questions)
     await state.reset_data()
     if size:

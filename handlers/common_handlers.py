@@ -152,6 +152,7 @@ async def show_questions(message: types.Message, state: FSMContext):
         showing_questions_keyboard = types.InlineKeyboardMarkup(row_width=3)
         showing_questions_keyboard.add(*buttons)
         await state.update_data(index=0, questions=questions)
+        await message.answer(text="Your questions 🧐:")
         await message.answer(text=f"Question:\n"
                                   f"{questions[0].text}\n\n"
                                   f"Answered: {is_answered_signs[questions[0].is_answered]}",

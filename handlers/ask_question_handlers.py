@@ -33,7 +33,8 @@ async def get_question(message: types.Message, state: FSMContext):
 
     await state.update_data(question=question_text)
     logger.info(msg=f"User {message.from_user.first_name}(@{message.from_user.username}) asked a question.")
-    await message.answer(text=f"Fine 😸 Now write all #hashtags in one message to this question like this (#dorm):")
+    await message.answer(
+        text=f"Fine 😸 Now write all #hashtags in one message to this question like this (#dorm #food):")
     await AskQuestionStates.getting_hashtags.set()
 
 

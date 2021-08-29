@@ -10,7 +10,6 @@ class CommonStates(StatesGroup):
     react_to_actions = State()
     show_questions = State()
     to_main_menu = State()
-    load_questions = State()
 
 
 class QuizStates(StatesGroup):
@@ -27,6 +26,9 @@ class RespondentStates(StatesGroup):
     send_actions = State()
     send_interactions = State()
     react_to_inters = State()
+    ask_for_available_questions = State()
+    show_available_questions = State()
+    show_answers = State()
 
 
 class CommonUserStates(StatesGroup):
