@@ -1,8 +1,8 @@
 """Resources for Answer."""
 
 # Libraries, classes and functions imports
-from flask import jsonify
 from flask_restful import Resource, abort, reqparse
+
 from data import db_session
 from data.AnswerModel import Answer
 

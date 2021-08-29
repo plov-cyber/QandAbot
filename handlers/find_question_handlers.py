@@ -34,15 +34,16 @@ async def get_hashtags(message: types.Message, state: FSMContext):
             msg=f"Showing questions to "
                 f"user {message.from_user.first_name}(@{message.from_user.username}) for hashtags {hashtags}.")
         buttons = [
-            types.InlineKeyboardButton(text='<--', callback_data="previous_question"),
-            types.InlineKeyboardButton(text=f'1/{size}', callback_data="question_num"),
-            types.InlineKeyboardButton(text='-->', callback_data="next_question"),
+            [types.InlineKeyboardButton(text='⬅️', callback_data="previous_question"),
+             types.InlineKeyboardButton(text=f'1/{size}', callback_data="question_num"),
+             types.InlineKeyboardButton(text='➡️', callback_data="next_question")]
         ]
         if suit_questions[0].is_answered:
-            buttons.append(types.InlineKeyboardButton(text="Show answer", callback_data="show_answer"))
+            buttons.append([types.InlineKeyboardButton(text="Show answer", callback_data="show_answer")])
+        buttons.append([types.InlineKeyboardButton(text="Back to menu ↩️🥺", callback_data="go_back")])
         showing_questions_keyboard = types.InlineKeyboardMarkup(row_width=3)
-        showing_questions_keyboard.add(*buttons)
-        await state.update_data(index=0, questions=suit_questions)
+        showing_questions_keyboard.inline_keyboard = buttons
+        await state.update_data(index=0, questions=suit_questions, message=message, show_answer=False)
         await message.answer(text=f"Question:\n"
                                   f"{suit_questions[0].text}\n\n"
                                   f"Answered: {is_answered_signs[suit_questions[0].is_answered]}",

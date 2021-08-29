@@ -8,7 +8,6 @@ from flask import Flask
 from flask_restful import Api
 
 from config import SECRET_KEY
-from data import db_session
 from resources.AnswerResources import AnswerResource, AnswersListResource
 from resources.HashtagResources import HashtagResource, HashtagsListResource
 from resources.QuestionResources import QuestionResource, QuestionsListResource

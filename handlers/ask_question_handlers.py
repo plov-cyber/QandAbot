@@ -45,7 +45,7 @@ async def get_hashtags(message: types.Message, state: FSMContext):
 
     hashtags = message.text
     if hashtags[0] != '#':
-        await message.answer(text="Please write hashtags like this: #hashtag1#hashtag2...")
+        await message.answer(text="Please write hashtags like this: #hashtag1 #hashtag2...")
         return
 
     hashtags = hashtags[1:].lower().split('#')

@@ -2,6 +2,7 @@
 import sqlalchemy
 from sqlalchemy import orm
 from sqlalchemy_serializer import SerializerMixin
+
 from .db_session import SqlAlchemyBase
 
 question_to_hashtag = sqlalchemy.Table('question_to_hashtag', SqlAlchemyBase.metadata,

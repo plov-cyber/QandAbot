@@ -28,6 +28,7 @@ class RespondentStates(StatesGroup):
     react_to_inters = State()
     ask_for_available_questions = State()
     show_available_questions = State()
+    give_answer = State()
     show_answers = State()
 
 

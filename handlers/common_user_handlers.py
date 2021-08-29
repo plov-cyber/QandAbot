@@ -37,7 +37,8 @@ async def common_user_send_interactions(message: types.Message):
                                                       row_width=1)
     buttons = [
         types.KeyboardButton(text="My questions"),
-        types.KeyboardButton(text="Become respondent")
+        types.KeyboardButton(text="Become respondent"),
+        types.KeyboardButton(text="Back to menu ↩️🥺")
     ]
     keyboard_for_interact.add(*buttons)
     await message.answer(text="Choose what you want to do:",

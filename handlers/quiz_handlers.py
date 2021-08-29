@@ -3,8 +3,8 @@
 # Libraries, classes and functions imports
 import asyncio
 import logging
-from time import time
 from random import shuffle
+from time import time
 
 from aiogram import Dispatcher, types
 from aiogram.dispatcher import FSMContext
@@ -83,7 +83,9 @@ async def passing_quiz(message: types.Message, state: FSMContext):
 
     if data["num"] == 20:
         logger.info(msg=f"User {message.from_user.first_name}(@{message.from_user.username}) passed the quiz.")
+        user = session.query(User).get(message.from_user.id)
         data["result"] = int(100 * (data["result"] / 20))
+        user.rating = round(data['result'] / 20, 1)
         await message.answer(text=f"My congratulations, you know Innopolis on {data['result']}%")
 
         if data["result"] >= 40:
@@ -97,10 +99,7 @@ async def passing_quiz(message: types.Message, state: FSMContext):
                                       "and the most active resident of the Innopolis?", reply_markup=keyboard)
             await RespondentStates.wait_for_reply.set()
         else:
-            user = session.query(User).get(message.from_user.id)
             user.is_respondent = 1
-            session.merge(user)
-            session.commit()
             logger.info(msg=f"User {message.from_user.first_name}(@{message.from_user.username}) failed the test.")
             await message.answer(text="Unfortunately 😿 You failed test,\n"
                                       "that is why we recommend you to walk\n"
@@ -109,6 +108,8 @@ async def passing_quiz(message: types.Message, state: FSMContext):
             # тест должен появляться снова через неделю
             await CommonUserStates.send_actions.set()
 
+        session.merge(user)
+        session.commit()
         quiz_dict.pop(message.from_user.id)
         return
 

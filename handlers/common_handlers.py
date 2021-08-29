@@ -43,9 +43,11 @@ async def cmd_start(message: types.Message, state: FSMContext):
     else:
         user = User(
             id=message.from_user.id,
+            chat_id=message.chat.id,
             username=message.from_user.username,
             first_name=message.from_user.first_name,
-            last_name=message.from_user.last_name
+            last_name=message.from_user.last_name,
+            rating=0
         )
         session.add(user)
         session.commit()
@@ -70,14 +72,6 @@ async def cmd_help(message: types.Message, state: FSMContext):
                               "📩: l.rekhlov@innopolis.university\n"
                               "📩: s.kamalov@innopolis.university\n"
                               "telegram: @RRMOLL\n", reply_markup=types.ReplyKeyboardRemove())
-
-
-async def cmd_cancel(message: types.Message, state: FSMContext):
-    """Function triggers on /cancel."""
-
-    logger.info(msg=f"User {message.from_user.first_name}(@{message.from_user.username}) sent /cancel command.")
-    await CommonStates.to_main_menu.set()
-    await send_user_to_main_menu(message, state)
 
 
 async def send_user_to_main_menu(message: types.Message, state: FSMContext):
@@ -143,15 +137,16 @@ async def show_questions(message: types.Message, state: FSMContext):
     if size:
         logger.info(msg=f"Showing user's {message.from_user.first_name}(@{message.from_user.username}) questions.")
         buttons = [
-            types.InlineKeyboardButton(text='<--', callback_data="previous_question"),
-            types.InlineKeyboardButton(text=f'1/{size}', callback_data="question_num"),
-            types.InlineKeyboardButton(text='-->', callback_data="next_question"),
+            [types.InlineKeyboardButton(text='⬅️', callback_data="previous_question"),
+             types.InlineKeyboardButton(text=f'1/{size}', callback_data="question_num"),
+             types.InlineKeyboardButton(text='➡️', callback_data="next_question")]
         ]
         if questions[0].is_answered:
-            buttons.append(types.InlineKeyboardButton(text="Show answer", callback_data="show_answer"))
+            buttons.append([types.InlineKeyboardButton(text="Show answer", callback_data="show_answer")])
+        buttons.append([types.InlineKeyboardButton(text="Back to menu ↩️🥺", callback_data="go_back")])
         showing_questions_keyboard = types.InlineKeyboardMarkup(row_width=3)
-        showing_questions_keyboard.add(*buttons)
-        await state.update_data(index=0, questions=questions)
+        showing_questions_keyboard.inline_keyboard = buttons
+        await state.update_data(index=0, questions=questions, message=message, show_answer=False)
         await message.answer(text="Your questions 🧐:")
         await message.answer(text=f"Question:\n"
                                   f"{questions[0].text}\n\n"
@@ -171,9 +166,12 @@ def register_common_handlers(dp: Dispatcher):
     logger.info(msg=f"Registering common handlers.")
     dp.register_message_handler(cmd_start, commands='start', state="*")
     dp.register_message_handler(cmd_help, commands='help', state='*')
-    dp.register_message_handler(cmd_cancel, commands='cancel', state="*")
     dp.register_message_handler(react_to_actions, state=CommonStates.react_to_actions)
     dp.register_message_handler(send_user_to_main_menu, state=CommonStates.to_main_menu)
+    dp.register_message_handler(send_user_to_main_menu,
+                                Text(equals="Back to menu ↩️🥺"), state=RespondentStates.react_to_inters)
+    dp.register_message_handler(send_user_to_main_menu,
+                                Text(equals="Back to menu ↩️🥺"), state=CommonUserStates.react_to_inters)
     dp.register_message_handler(show_questions, Text(equals="My questions"),
                                 state=CommonUserStates.react_to_inters)
     dp.register_message_handler(show_questions, Text(equals="My questions"),
