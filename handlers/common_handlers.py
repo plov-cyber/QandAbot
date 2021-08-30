@@ -132,6 +132,7 @@ async def show_questions(message: types.Message, state: FSMContext):
     """Showing user's questions."""
 
     await state.reset_data()
+    await message.bot.unpin_all_chat_messages(chat_id=message.chat.id)
     questions = session.query(Question).filter(Question.from_user_id == message.from_user.id).all()
     size = len(questions)
     if size:
@@ -176,3 +177,4 @@ def register_common_handlers(dp: Dispatcher):
                                 state=CommonUserStates.react_to_inters)
     dp.register_message_handler(show_questions, Text(equals="My questions"),
                                 state=RespondentStates.react_to_inters)
+    dp.register_message_handler(show_questions, state=CommonStates.show_questions)

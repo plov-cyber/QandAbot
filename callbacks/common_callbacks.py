@@ -24,27 +24,40 @@ async def swipe_questions(callback: types.CallbackQuery, state: FSMContext):
     user_data = await state.get_data()
     i, questions = user_data['index'], user_data['questions']
     show_answer = user_data['show_answer']
+    answer = session.query(Answer).filter(Answer.question == questions[i]).first()
     message = user_data['message']
     showing_questions_keyboard = types.InlineKeyboardMarkup(row_width=3)
     size = len(questions)
     action = callback.data
     if action == "previous_question":
+        if size == 1:
+            await callback.answer()
+            return
         i = (i - 1 + size) % size
     elif action == "next_question":
+        if size == 1:
+            await callback.answer()
+            return
         i = (i + 1) % size
     elif action == "go_back":
         user = session.query(User).get(callback.from_user.id)
         stat = user.is_respondent
+        await callback.answer()
         if stat in [0, 1, 2]:
             await CommonUserStates.send_interactions.set()
             await common_user_send_interactions(message)
         elif stat == 3:
             await RespondentStates.send_interactions.set()
             await respondent_send_interactions(message)
+        return
     elif action == "show_answer":
         show_answer = True
     elif action == 'hide_answer':
         show_answer = False
+    elif action == 'send_request':
+        pass
+    elif action == 'bad_answer':
+        pass
     buttons = [
         [types.InlineKeyboardButton(text='⬅️', callback_data="previous_question"),
          types.InlineKeyboardButton(text=f'{i + 1}/{size}', callback_data="question_num"),
@@ -54,6 +67,8 @@ async def swipe_questions(callback: types.CallbackQuery, state: FSMContext):
         buttons.append([types.InlineKeyboardButton(text='Show answer', callback_data="show_answer")])
     elif questions[i].is_answered and show_answer:
         buttons.append([types.InlineKeyboardButton(text='Hide answer', callback_data="hide_answer")])
+        buttons.append([types.InlineKeyboardButton(text='Request for annotated chat', callback_data="send_request")])
+        buttons.append([types.InlineKeyboardButton(text="Bad answer", callback_data="bad_answer")])
     buttons.append([types.InlineKeyboardButton(text="Back to menu ↩️🥺", callback_data="go_back")])
     showing_questions_keyboard.inline_keyboard = buttons
     await state.update_data(index=i, show_answer=show_answer)
@@ -63,7 +78,6 @@ async def swipe_questions(callback: types.CallbackQuery, state: FSMContext):
                                               f"Answered: {is_answered_signs[questions[i].is_answered]}",
                                          reply_markup=showing_questions_keyboard)
     elif show_answer:
-        answer = session.query(Answer).filter(Answer.question == questions[i]).first()
         await callback.message.edit_text(text=f"Question:\n"
                                               f"{questions[i].text}\n\n"
                                               f"Answer:\n"

@@ -141,10 +141,12 @@ async def respondent_show_available_questions(message: types.Message, state: FSM
 
     text = message.text
     if text == "Scroll all questions":
-        questions = session.query(Question).filter(Question.is_answered == 0).all()
+        questions = session.query(Question).filter(Question.is_answered == 0 and
+                                                   Question.from_user_id != message.from_user.id).all()
     elif text[0] == "#":
         hashtags = [h.strip() for h in text[1:].lower().split("#")]
-        questions = list(filter(lambda x: not x.is_answered, find_questions_by_hashtags(hashtags)))
+        questions = list(filter(lambda x: not x.is_answered and x.from_user_id != message.from_user.id,
+                                find_questions_by_hashtags(hashtags)))
     else:
         await message.answer(text="Please write hashtags like this: #hashtag1#hashtag2...")
         return
@@ -190,8 +192,10 @@ async def respondent_give_answer(message: types.Message, state: FSMContext):
     session.add(answer)
     session.commit()
     user = session.query(User).get(question.from_user_id)
-    await message.bot.send_message(chat_id=user.chat_id,
-                                   text=f"✉️ Your question \"{question.text}\" has been answered ✉️")
+    notification = await message.bot.send_message(chat_id=user.chat_id,
+                                                  text=f"✉️ Your question\n\"{question.text}\"\n"
+                                                       f"has been answered ✉️")
+    await message.bot.pin_chat_message(chat_id=user.chat_id, message_id=notification.message_id)
     await message.answer(text="We appreciate you for answer.")
     logger.info(msg=f"Respondent {message.from_user.first_name}(@{message.from_user.username}) "
                     f"gave answer on question \"{question.text}\".")

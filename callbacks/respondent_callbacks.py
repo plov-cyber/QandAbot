@@ -30,7 +30,9 @@ async def respondent_swipe_available_questions(callback: types.CallbackQuery, st
         i = (i + 1) % size
     elif action == 'go_back':
         await RespondentStates.send_interactions.set()
+        await callback.answer()
         await respondent_send_interactions(message)
+        return
     elif action == "give_answer":
         await state.reset_data()
         await state.update_data(question=questions[i])

@@ -27,13 +27,20 @@ async def swipe_found_question(callback: types.CallbackQuery, state: FSMContext)
     size = len(questions)
     action = callback.data
     if action == "previous_question":
+        if size == 1:
+            await callback.answer()
+            return
         i = (i - 1 + size) % size
     elif action == "next_question":
+        if size == 1:
+            await callback.answer()
+            return
         i = (i + 1) % size
     elif action == "go_back":
         await CommonStates.to_main_menu.set()
         await callback.answer()
         await send_user_to_main_menu(message, state)
+        return
     elif action == 'show_answer':
         show_answer = True
     elif action == 'hide_answer':
