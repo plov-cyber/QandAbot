@@ -158,8 +158,13 @@ async def show_questions(message: types.Message, state: FSMContext):
     else:
         await message.answer(text="Sorry, but there are no questions.")
         await asyncio.sleep(0.5)
-        await CommonStates.to_main_menu.set()
-        await send_user_to_main_menu(message, state)
+        user = session.query(User).get(message.from_user.id)
+        if user.is_respondent in [0, 1, 2]:
+            await CommonUserStates.send_interactions.set()
+            await common_user_send_interactions(message)
+        else:
+            await RespondentStates.send_interactions.set()
+            await respondent_send_interactions(message)
 
 
 def register_common_handlers(dp: Dispatcher):

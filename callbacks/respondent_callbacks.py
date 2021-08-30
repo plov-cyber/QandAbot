@@ -89,6 +89,54 @@ async def respondent_swipe_answers(callback: types.CallbackQuery, state: FSMCont
     await callback.answer()
 
 
+async def respondent_show_requests(callback: types.CallbackQuery, state: FSMContext):
+    """Shows requests to respondent."""
+
+    user_data = await state.get_data()
+    i, requests = user_data['index'], user_data['requests']
+    message = user_data['message']
+    made_action = user_data['made_action']
+    show_requests_keyboard = types.InlineKeyboardMarkup(row_width=3)
+    size = len(requests)
+    action = callback.data
+    if action == "prev_request":
+        if size == 1:
+            await callback.answer()
+            return
+        i = (i - 1 + size) % size
+    elif action == "next_request":
+        if size == 1:
+            await callback.answer()
+            return
+        i = (i + 1) % size
+    elif action == "go_back":
+        await RespondentStates.send_interactions.set()
+        await respondent_send_interactions(message)
+    elif action == "accept":
+        made_action = True
+    elif action == "refuse":
+        made_action = True
+        session.delete(requests[i])
+        session.commit()
+        await callback.answer(text="Request was refused")
+    buttons = [
+        [types.InlineKeyboardButton(text='⬅️', callback_data="prev_request"),
+         types.InlineKeyboardButton(text=f'1/{size}', callback_data="question_num"),
+         types.InlineKeyboardButton(text='➡️', callback_data="next_request")],
+    ]
+    if not made_action:
+        buttons.extend([[types.InlineKeyboardButton(text="Accept", callback_data="accept")],
+                        [types.InlineKeyboardButton(text="Refuse", callback_data="refuse")]])
+    buttons.append([types.InlineKeyboardButton(text="Back to menu ↩️🥺", callback_data="go_back")])
+    show_requests_keyboard.inline_keyboard = buttons
+    question = session.query(Question).filter(Question.id == requests[i].question_id).first()
+    await state.update_data(index=i, made_action=made_action)
+    await callback.message.edit_text(text=f"Request for question:\n"
+                                          f"\"{question.text}\"",
+                                     reply_markup=show_requests_keyboard)
+    await callback.answer()
+
+
 def register_respondent_callbacks(dp: Dispatcher):
     """Register all respondent callbacks to dispatcher."""
 
@@ -96,3 +144,4 @@ def register_respondent_callbacks(dp: Dispatcher):
     dp.register_callback_query_handler(respondent_swipe_available_questions,
                                        state=RespondentStates.show_available_questions)
     dp.register_callback_query_handler(respondent_swipe_answers, state=RespondentStates.show_answers)
+    dp.register_callback_query_handler(respondent_show_requests, state=RespondentStates.show_requests)

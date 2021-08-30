@@ -26,7 +26,7 @@ async def swipe_questions(callback: types.CallbackQuery, state: FSMContext):
     i, questions = user_data['index'], user_data['questions']
     show_answer = user_data['show_answer']
     request_sent = user_data['request_sent']
-    answer = session.query(Answer).filter(Answer.question == questions[i]).first()
+    answer = session.query(Answer).filter(Answer.question_id == questions[i].id).first()
     message = user_data['message']
     showing_questions_keyboard = types.InlineKeyboardMarkup(row_width=3)
     size = len(questions)
@@ -38,11 +38,13 @@ async def swipe_questions(callback: types.CallbackQuery, state: FSMContext):
             await callback.answer()
             return
         i = (i - 1 + size) % size
+        show_answer = False
     elif action == "next_question":
         if size == 1:
             await callback.answer()
             return
         i = (i + 1) % size
+        show_answer = False
     elif action == "go_back":
         user = session.query(User).get(callback.from_user.id)
         stat = user.is_respondent

@@ -11,6 +11,7 @@ from aiogram.dispatcher.filters import Text
 from data import db_session
 from data.AnswerModel import Answer
 from data.QuestionModel import Question
+from data.RequestModel import Request
 from data.UserModel import User
 from handlers.states import RespondentStates, CommonStates
 from helpers import find_questions_by_hashtags
@@ -234,9 +235,36 @@ async def respondent_show_answers(message: types.Message, state: FSMContext):
 async def respondent_show_requests(message: types.Message, state: FSMContext):
     """Show requests to respondent."""
 
-    logger.info(msg=f"Showing requests to respondent {message.from_user.first_name}(@{message.from_user.username})")
     await state.reset_data()
-    await RespondentStates.show_requests.set()
+    await message.bot.unpin_all_chat_messages(chat_id=message.chat.id)
+
+    requests = session.query(Request).filter(Request.to_user_id == message.from_user.id).all()
+    size = len(requests)
+    if size:
+        logger.info(msg=f"Showing requests to respondent "
+                        f"{message.from_user.first_name}(@{message.from_user.username})")
+        buttons = [
+            [types.InlineKeyboardButton(text='⬅️', callback_data="prev_request"),
+             types.InlineKeyboardButton(text=f'1/{size}', callback_data="question_num"),
+             types.InlineKeyboardButton(text='➡️', callback_data="next_request")],
+            [types.InlineKeyboardButton(text="Accept", callback_data="accept")],
+            [types.InlineKeyboardButton(text="Refuse", callback_data="refuse")],
+            [types.InlineKeyboardButton(text="Back to menu ↩️🥺", callback_data="go_back")]
+        ]
+        show_requests_keyboard = types.InlineKeyboardMarkup(row_width=3)
+        show_requests_keyboard.inline_keyboard = buttons
+        question = session.query(Question).get(requests[0].question_id)
+        await state.update_data(index=0, requests=requests, message=message,
+                                made_action=False)
+        await message.answer(text=f"Request for question:\n"
+                                  f"\"{question.text}\"",
+                             reply_markup=show_requests_keyboard)
+        await RespondentStates.show_requests.set()
+    else:
+        await message.answer(text="Sorry, but there are no requests.")
+        await asyncio.sleep(0.5)
+        await RespondentStates.send_interactions.set()
+        await respondent_send_interactions(message)
 
 
 def register_respondent_handlers(dp: Dispatcher):
@@ -248,6 +276,8 @@ def register_respondent_handlers(dp: Dispatcher):
     dp.register_message_handler(respondent_send_interactions, state=RespondentStates.send_interactions)
     dp.register_message_handler(respondent_show_answers, Text(equals="My answers"),
                                 state=RespondentStates.react_to_inters)
+    dp.register_message_handler(respondent_show_requests, Text(equals="Requests"),
+                                state=RespondentStates.react_to_inters)
     dp.register_message_handler(respondent_react_to_inters, state=RespondentStates.react_to_inters)
     dp.register_message_handler(respondent_ask_for_available_questions,
                                 state=RespondentStates.ask_for_available_questions)
@@ -255,5 +285,3 @@ def register_respondent_handlers(dp: Dispatcher):
     dp.register_message_handler(respondent_give_answer, state=RespondentStates.give_answer)
     dp.register_message_handler(respondent_show_answers, state=RespondentStates.show_answers)
     dp.register_message_handler(respondent_show_requests, state=RespondentStates.show_requests)
-    dp.register_message_handler(respondent_show_requests, Text(equals="Requests"),
-                                state=RespondentStates.react_to_inters)
