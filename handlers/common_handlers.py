@@ -147,7 +147,8 @@ async def show_questions(message: types.Message, state: FSMContext):
         buttons.append([types.InlineKeyboardButton(text="Back to menu ↩️🥺", callback_data="go_back")])
         showing_questions_keyboard = types.InlineKeyboardMarkup(row_width=3)
         showing_questions_keyboard.inline_keyboard = buttons
-        await state.update_data(index=0, questions=questions, message=message, show_answer=False)
+        await state.update_data(index=0, questions=questions, message=message, show_answer=False,
+                                request_sent=False)
         await message.answer(text="Your questions 🧐:")
         await message.answer(text=f"Question:\n"
                                   f"{questions[0].text}\n\n"

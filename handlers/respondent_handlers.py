@@ -113,8 +113,6 @@ async def respondent_react_to_inters(message: types.Message):
         await message.answer(text="Do you want to find question by # or scroll all questions?",
                              reply_markup=keyboard)
         await RespondentStates.ask_for_available_questions.set()
-    elif text == "Requests":
-        pass
 
 
 async def respondent_ask_for_available_questions(message: types.Message, state: FSMContext):
@@ -141,7 +139,7 @@ async def respondent_show_available_questions(message: types.Message, state: FSM
 
     text = message.text
     if text == "Scroll all questions":
-        questions = session.query(Question).filter(Question.is_answered == 0 and
+        questions = session.query(Question).filter(Question.is_answered == 0,
                                                    Question.from_user_id != message.from_user.id).all()
     elif text[0] == "#":
         hashtags = [h.strip() for h in text[1:].lower().split("#")]
@@ -233,6 +231,14 @@ async def respondent_show_answers(message: types.Message, state: FSMContext):
         await respondent_send_interactions(message)
 
 
+async def respondent_show_requests(message: types.Message, state: FSMContext):
+    """Show requests to respondent."""
+
+    logger.info(msg=f"Showing requests to respondent {message.from_user.first_name}(@{message.from_user.username})")
+    await state.reset_data()
+    await RespondentStates.show_requests.set()
+
+
 def register_respondent_handlers(dp: Dispatcher):
     """Registers all respondent_handlers to dispatcher."""
 
@@ -248,3 +254,6 @@ def register_respondent_handlers(dp: Dispatcher):
     dp.register_message_handler(respondent_show_available_questions, state=RespondentStates.show_available_questions)
     dp.register_message_handler(respondent_give_answer, state=RespondentStates.give_answer)
     dp.register_message_handler(respondent_show_answers, state=RespondentStates.show_answers)
+    dp.register_message_handler(respondent_show_requests, state=RespondentStates.show_requests)
+    dp.register_message_handler(respondent_show_requests, Text(equals="Requests"),
+                                state=RespondentStates.react_to_inters)

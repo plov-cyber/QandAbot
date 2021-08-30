@@ -20,3 +20,4 @@ class User(SqlAlchemyBase, SerializerMixin):
     is_respondent = sqlalchemy.Column(sqlalchemy.SmallInteger, nullable=False, default=0)
     questions = orm.relation('Question', back_populates='from_user')
     answers = orm.relation('Answer', back_populates='from_user')
+    requests = orm.relation('Request', back_populates='to_user')

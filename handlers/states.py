@@ -30,6 +30,7 @@ class RespondentStates(StatesGroup):
     show_available_questions = State()
     give_answer = State()
     show_answers = State()
+    show_requests = State()
 
 
 class CommonUserStates(StatesGroup):

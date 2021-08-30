@@ -24,3 +24,4 @@ class Question(SqlAlchemyBase, SerializerMixin):
     from_user = orm.relation('User')
     answers = orm.relation('Answer', back_populates='question')
     hashtags = orm.relation('Hashtag', secondary='question_to_hashtag', backref='questions')
+    requests = orm.relation('Request', back_populates='question')

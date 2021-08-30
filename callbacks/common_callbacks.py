@@ -8,6 +8,7 @@ from aiogram.dispatcher import FSMContext
 
 from data import db_session
 from data.AnswerModel import Answer
+from data.RequestModel import Request
 from data.UserModel import User
 from handlers.common_handlers import is_answered_signs
 from handlers.common_user_handlers import common_user_send_interactions
@@ -24,10 +25,13 @@ async def swipe_questions(callback: types.CallbackQuery, state: FSMContext):
     user_data = await state.get_data()
     i, questions = user_data['index'], user_data['questions']
     show_answer = user_data['show_answer']
+    request_sent = user_data['request_sent']
     answer = session.query(Answer).filter(Answer.question == questions[i]).first()
     message = user_data['message']
     showing_questions_keyboard = types.InlineKeyboardMarkup(row_width=3)
     size = len(questions)
+    request = session.query(Request).filter(
+        Request.from_user_id == message.from_user.id, Request.question_id == questions[i].id).all()
     action = callback.data
     if action == "previous_question":
         if size == 1:
@@ -55,7 +59,25 @@ async def swipe_questions(callback: types.CallbackQuery, state: FSMContext):
     elif action == 'hide_answer':
         show_answer = False
     elif action == 'send_request':
-        pass
+        logger.info(msg=f"User {message.from_user.first_name}(@{message.from_user.username}) "
+                        f"sent request for annotated chat.")
+        if request:
+            await callback.answer(text="You already sent request!")
+            return
+        request = Request(
+            from_user_id=questions[i].from_user_id,
+            to_user_id=answer.from_user_id,
+            question_id=questions[i].id
+        )
+        session.add(request)
+        session.commit()
+        request_sent = True
+        notification = await message.bot.send_message(chat_id=answer.from_user_id,
+                                                      text="💌 Mmm, Somebody want to talk with you,"
+                                                           "pls go to Requests to answer on it. 💌")
+        await message.bot.pin_chat_message(chat_id=answer.from_user_id,
+                                           message_id=notification.message_id)
+        await callback.answer(text="Your request sent successfully.")
     elif action == 'bad_answer':
         pass
     buttons = [
@@ -67,11 +89,13 @@ async def swipe_questions(callback: types.CallbackQuery, state: FSMContext):
         buttons.append([types.InlineKeyboardButton(text='Show answer', callback_data="show_answer")])
     elif questions[i].is_answered and show_answer:
         buttons.append([types.InlineKeyboardButton(text='Hide answer', callback_data="hide_answer")])
-        buttons.append([types.InlineKeyboardButton(text='Request for annotated chat', callback_data="send_request")])
         buttons.append([types.InlineKeyboardButton(text="Bad answer", callback_data="bad_answer")])
+        if not request_sent and not request:
+            buttons.append(
+                [types.InlineKeyboardButton(text='Request for annotated chat', callback_data="send_request")])
     buttons.append([types.InlineKeyboardButton(text="Back to menu ↩️🥺", callback_data="go_back")])
     showing_questions_keyboard.inline_keyboard = buttons
-    await state.update_data(index=i, show_answer=show_answer)
+    await state.update_data(index=i, show_answer=show_answer, request_sent=request_sent)
     if not show_answer:
         await callback.message.edit_text(text=f"Question:\n"
                                               f"{questions[i].text}\n\n"
