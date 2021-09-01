@@ -62,7 +62,7 @@ async def swipe_questions(callback: types.CallbackQuery, state: FSMContext):
         show_answer = False
     elif action == 'send_request':
         logger.info(msg=f"User {message.from_user.first_name}(@{message.from_user.username}) "
-                        f"sent request for annotated chat.")
+                        f"sent request for anonymous chat.")
         if request:
             await callback.answer(text="You already sent request!")
             return
@@ -94,7 +94,7 @@ async def swipe_questions(callback: types.CallbackQuery, state: FSMContext):
         buttons.append([types.InlineKeyboardButton(text="Bad answer", callback_data="bad_answer")])
         if not request_sent and not request:
             buttons.append(
-                [types.InlineKeyboardButton(text='Request for annotated chat', callback_data="send_request")])
+                [types.InlineKeyboardButton(text='Request for anonymous chat', callback_data="send_request")])
     buttons.append([types.InlineKeyboardButton(text="Back to menu ↩️🥺", callback_data="go_back")])
     showing_questions_keyboard.inline_keyboard = buttons
     await state.update_data(index=i, show_answer=show_answer, request_sent=request_sent)

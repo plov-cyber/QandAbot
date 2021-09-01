@@ -8,8 +8,9 @@ from aiogram.dispatcher import FSMContext
 
 from data import db_session
 from data.QuestionModel import Question
+from handlers.dialogue_handlers import start_chat
 from handlers.respondent_handlers import respondent_send_interactions
-from handlers.states import RespondentStates
+from handlers.states import RespondentStates, DialogueStates
 
 logger = logging.getLogger(__name__)
 session = db_session.create_session()
@@ -71,6 +72,7 @@ async def respondent_swipe_answers(callback: types.CallbackQuery, state: FSMCont
         i = (i + 1) % size
     elif action == 'go_back':
         await RespondentStates.send_interactions.set()
+        await callback.answer()
         await respondent_send_interactions(message)
     buttons = [
         [types.InlineKeyboardButton(text='⬅️', callback_data="previous_question"),
@@ -111,17 +113,22 @@ async def respondent_show_requests(callback: types.CallbackQuery, state: FSMCont
         i = (i + 1) % size
     elif action == "go_back":
         await RespondentStates.send_interactions.set()
+        await callback.answer()
         await respondent_send_interactions(message)
     elif action == "accept":
         made_action = True
-    elif action == "refuse":
-        made_action = True
+        await DialogueStates.start_chat.set()
+        await state.reset_data()
+        await state.update_data(request=requests[i])
         session.delete(requests[i])
         session.commit()
+        await start_chat(message, state)
+    elif action == "refuse":
+        made_action = True
         await callback.answer(text="Request was refused")
     buttons = [
         [types.InlineKeyboardButton(text='⬅️', callback_data="prev_request"),
-         types.InlineKeyboardButton(text=f'1/{size}', callback_data="question_num"),
+         types.InlineKeyboardButton(text=f'{i + 1}/{size}', callback_data="question_num"),
          types.InlineKeyboardButton(text='➡️', callback_data="next_request")],
     ]
     if not made_action:

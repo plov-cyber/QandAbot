@@ -33,7 +33,7 @@ async def reply_on_quiz(message: types.Message, state: FSMContext):
     """Different replies before quiz."""
 
     text = message.text
-    if text == "I prefer to do it later":
+    if text == "I prefer to do it later...":
         logger.info(msg=f"User {message.from_user.first_name}(@{message.from_user.username}) skipped the test.")
         await CommonStates.to_main_menu.set()
         await send_user_to_main_menu(message, state)

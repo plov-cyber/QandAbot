@@ -53,3 +53,10 @@ class AskQuestionStates(StatesGroup):
 
     getting_question = State()
     getting_hashtags = State()
+
+
+class DialogueStates(StatesGroup):
+    """States for anonymous chat."""
+
+    start_chat = State()
+    chatting = State()

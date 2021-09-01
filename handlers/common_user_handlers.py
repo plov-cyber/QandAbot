@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 keyboard_for_quiz = types.ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True)
 buttons = [
     types.KeyboardButton(text="Give me this test!"),
-    types.KeyboardButton(text="I prefer to do it later")
+    types.KeyboardButton(text="I prefer to do it later...")
 ]
 keyboard_for_quiz.add(*buttons)
 
@@ -59,8 +59,14 @@ async def common_user_react_to_inters(message: types.Message, state: FSMContext)
             await state.finish()
         else:
             stat = user.is_respondent
-            responses = ["To become a respondent you should pass the test.",
-                         "To become a respondent you should take the test again."]
+            responses = ["To become a respondent you should pass the test!!!",
+                         "To become a respondent you should take the test again!!!"]
+            await message.answer(text="The liability of the respondent includes:\n\n"
+                                      "1. Answer up to 10 questions about Innopolis\n"
+                                      "2. Respond with culture and respect to the question\n"
+                                      "3. Answer correctly\n"
+                                      "4. Please give full answers:\n"
+                                      "!!!Wrong: <s>It's so easy...</s>")
             if stat in [0, 1]:
                 logger.info(
                     msg=f"User {message.from_user.first_name}(@{message.from_user.username}) wants to pass quiz.")
@@ -90,15 +96,21 @@ async def common_user_send_actions(message: types.Message):
     ]
     keyboard_for_questions.add(*buttons)
     await message.answer(text=f"-How to use Q&A Bot?\n"
-                              f"-It's so easy in using:\n"
+                              f"-It's so easy in using:\n\n"
                               f"1. If you want to find a question in data base:\n"
-                              f"    You need to send #Hashtags, which describe your question 🙋 \n"
-                              f"    After, you get some questions with the same #Hashtags \n"
-                              f"    Next, you can flip questions over by ⬅️➡️\n"
+                              f"    - You need to send #Hashtags, which describe your question 🙋 \n"
+                              f"    - After, you get some questions with the same #Hashtags \n"
+                              f"    - Next, you can flip questions over by ⬅️➡️\n\n"
                               f"2. If you want to create your question:\n"
-                              f"    You need to send the question\n"
-                              f"    After, send all #Hashtags in one message\n"
-                              f"    Next, you need only wait...", reply_markup=keyboard_for_questions)
+                              f"    - You need to send the question\n"
+                              f"    - After, send all #Hashtags in one message\n"
+                              f"    - Next, you need only wait...\n\n"
+                              f"3. If you want to open 'My questions' or become 'Respondent'\n"
+                              f"    - You need to press the 'Interaction' button\n\n"
+                              f"4. If you want to request an anonymous chat about any question:\n"
+                              f"    - You need to choose question about which you want to request a chat\n"
+                              f"    - After, press the 'Show answer' and 'Request'",
+                         reply_markup=keyboard_for_questions)
     await CommonStates.react_to_actions.set()
 
 

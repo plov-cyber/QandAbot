@@ -2,6 +2,7 @@
 
 # Initializing database
 from data import db_session
+
 db_session.global_init('db/data.sqlite')
 
 # Libraries, classes and functions imports
@@ -20,6 +21,8 @@ from handlers.find_question_handlers import register_find_question_handlers
 from handlers.quiz_handlers import register_quiz_handlers
 from handlers.respondent_handlers import register_respondent_handlers
 from callbacks.respondent_callbacks import register_respondent_callbacks
+from handlers.dialogue_handlers import register_dialogue_handlers
+from callbacks.dialogue_callbacks import register_dialogue_callbacks
 
 # Creating bot, logger and dispatcher
 logging.basicConfig(level=logging.INFO,
@@ -35,7 +38,9 @@ register_respondent_handlers(dp)
 register_common_user_handlers(dp)
 register_find_question_handlers(dp)
 register_ask_question_handlers(dp)
+register_dialogue_handlers(dp)
 
+register_dialogue_callbacks(dp)
 register_common_callbacks(dp)
 register_find_question_callbacks(dp)
 register_respondent_callbacks(dp)

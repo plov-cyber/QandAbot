@@ -28,7 +28,7 @@ ok_keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=
 session = db_session.create_session()
 
 
-async def reply_on_respondent(message: types.Message, state: FSMContext):
+async def reply_on_respondent(message: types.Message):
     """Different replies about respondent."""
 
     text = message.text
@@ -46,7 +46,7 @@ async def reply_on_respondent(message: types.Message, state: FSMContext):
         user.is_respondent = 2
         session.merge(user)
         session.commit()
-        await message.answer(text="Next time, you will be able to become a responder without passing the test.",
+        await message.answer(text="Next time, you will be able to become a responder without passing the test!!!",
                              reply_markup=ok_keyboard)
         await RespondentStates.send_actions.set()
     else:
@@ -64,20 +64,28 @@ async def respondent_send_actions(message: types.Message):
         types.KeyboardButton(text="Interaction")
     ]
     keyboard_for_respondent.add(*buttons)
-    await message.answer(text="The liability of the respondent includes:\n\n"
-                              "1. Answer up to 10 questions about Innopolis\n"
-                              "2. Respond with culture and respect to the question\n"
-                              "3. Answer correctly\n"
-                              "4. Please give full answers:\n"
-                              "!!!Wrong: <s>It's so easy...</s>\n"
-                              "a) If you want to find a question in data base:\n"
-                              "-You need to send #Hashtags, which describe your question 🙋 \n"
-                              "-After, you get some questions with the same #Hashtags\n"
-                              "-Next, you can flip questions over by ⬅️➡️\n"
-                              "b) If you want to create your question:\n"
-                              "-You need to send the question\n"
-                              "-After, send all #Hashtags in one message\n"
-                              "-Next, you need only wait...",
+    await message.answer(text=f"-How to use Q&A Bot?\n"
+                              f"-It's so easy in using:\n\n"
+                              f"1. If you want to find a question in data base:\n"
+                              f"    - You need to send #Hashtags, which describe your question 🙋 \n"
+                              f"    - After, you get some questions with the same #Hashtags \n"
+                              f"    - Next, you can flip questions over by ⬅️➡️\n\n"
+                              f"2. If you want to create your question:\n"
+                              f"    - You need to send the question\n"
+                              f"    - After, send all #Hashtags in one message\n"
+                              f"    - Next, you need only wait...\n\n"
+                              f"3. If you want to check your questions:\n"
+                              f"    - You need to press the 'Interaction' button\n"
+                              f"    - Next, press the 'My questions' button\n\n"
+                              f"4. If you want to check your answers:\n"
+                              f"    - You need to press the 'Interaction' button\n"
+                              f"    - Next, press the 'My answers' button\n\n"
+                              f"5. If you want to answer on available questions:\n"
+                              f"    - You need to press the 'Interaction' button\n"
+                              f"    - Next, press the 'Available questions' button\n\n"
+                              f"6. If you get request on anonymous chat:\n"
+                              f"    - You need to press the 'Interaction' button\n"
+                              f"    - Next, press the 'Requests' button\n",
                          parse_mode="HTML", reply_markup=keyboard_for_respondent)
     await CommonStates.react_to_actions.set()
 
@@ -195,7 +203,7 @@ async def respondent_give_answer(message: types.Message, state: FSMContext):
                                                   text=f"✉️ Your question\n\"{question.text}\"\n"
                                                        f"has been answered ✉️")
     await message.bot.pin_chat_message(chat_id=user.chat_id, message_id=notification.message_id)
-    await message.answer(text="We appreciate you for answer.")
+    await message.answer(text="We appreciate you for answer🤗")
     logger.info(msg=f"Respondent {message.from_user.first_name}(@{message.from_user.username}) "
                     f"gave answer on question \"{question.text}\".")
     await RespondentStates.send_interactions.set()
@@ -220,6 +228,7 @@ async def respondent_show_answers(message: types.Message, state: FSMContext):
         show_answers_keyboard = types.InlineKeyboardMarkup(row_width=3)
         show_answers_keyboard.inline_keyboard = buttons
         await state.update_data(index=0, answers=answers, message=message)
+        await message.answer(text="Your answers✍🏽")
         await message.answer(text=f"Question:\n"
                                   f"{answers[0].question.text}\n\n"
                                   f"Your answer:\n"

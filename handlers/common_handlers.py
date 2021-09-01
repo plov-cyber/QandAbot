@@ -22,7 +22,7 @@ logger = logging.getLogger(__name__)
 keyboard_for_quiz = types.ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True)
 buttons = [
     types.KeyboardButton(text="Give me this test!"),
-    types.KeyboardButton(text="I prefer to do it later")
+    types.KeyboardButton(text="I prefer to do it later...")
 ]
 keyboard_for_quiz.add(*buttons)
 is_answered_signs = ['❌', '✅']
@@ -54,10 +54,10 @@ async def cmd_start(message: types.Message, state: FSMContext):
         logger.info(msg=f"User {message.from_user.first_name}(@{message.from_user.username}) successfully registered.")
         user_name = message.from_user.first_name + ' ' + message.from_user.last_name \
             if message.from_user.last_name else message.from_user.first_name
-        await message.answer(text=f"Hi 👋🏼 {user_name}.\n"
-                                  f"You successfully registered and you have access to the questions database🎉🎉🎉\n"
+        await message.answer(text=f"Hi 👋🏼 {user_name}!!!\n"
+                                  f"You successfully registered and you have access to the questions database🎉🎉🎉\n\n"
                                   f"However, in order to answer on the questions and earn Innopoints you have to pass"
-                                  f" a fascinating test to determine your competence in different spheres.",
+                                  f" a fascinating test to determine your competence in different spheres of Innopolis.",
                              reply_markup=keyboard_for_quiz)
         await QuizStates.wait_for_reply.set()
 
