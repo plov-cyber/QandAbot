@@ -95,21 +95,10 @@ async def common_user_send_actions(message: types.Message):
         types.KeyboardButton(text="Interaction")
     ]
     keyboard_for_questions.add(*buttons)
-    await message.answer(text=f"-How to use Q&A Bot?\n"
-                              f"-It's so easy in using:\n\n"
-                              f"1. If you want to find a question in data base:\n"
-                              f"    - You need to send #Hashtags, which describe your question 🙋 \n"
-                              f"    - After, you get some questions with the same #Hashtags \n"
-                              f"    - Next, you can flip questions over by ⬅️➡️\n\n"
-                              f"2. If you want to create your question:\n"
-                              f"    - You need to send the question\n"
-                              f"    - After, send all #Hashtags in one message\n"
-                              f"    - Next, you need only wait...\n\n"
-                              f"3. If you want to open 'My questions' or become 'Respondent'\n"
-                              f"    - You need to press the 'Interaction' button\n\n"
-                              f"4. If you want to request an anonymous chat about any question:\n"
-                              f"    - You need to choose question about which you want to request a chat\n"
-                              f"    - After, press the 'Show answer' and 'Request'",
+    await message.answer(text=f"Available commands for you:\n"
+                              f"/start - Restart bot\n"
+                              f"/help - About us\n"
+                              f"/rules - How to use bot",
                          reply_markup=keyboard_for_questions)
     await CommonStates.react_to_actions.set()
 

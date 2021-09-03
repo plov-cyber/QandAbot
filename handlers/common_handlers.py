@@ -18,7 +18,7 @@ from handlers.states import QuizStates, RespondentStates, CommonUserStates, AskQ
 
 logger = logging.getLogger(__name__)
 
-# Keyboard asking about passing quiz.
+# Keyboards.
 keyboard_for_quiz = types.ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True)
 buttons = [
     types.KeyboardButton(text="Give me this test!"),
@@ -26,6 +26,9 @@ buttons = [
 ]
 keyboard_for_quiz.add(*buttons)
 is_answered_signs = ['❌', '✅']
+
+to_main_menu_kb = types.ReplyKeyboardMarkup(resize_keyboard=True)
+to_main_menu_kb.add(types.KeyboardButton(text="Back to menu ↩️🥺"))
 
 # Creating session for db.
 session = db_session.create_session()
@@ -38,6 +41,7 @@ async def cmd_start(message: types.Message, state: FSMContext):
     await state.finish()
     user = session.query(User).get(message.from_user.id)
     if user:
+        await message.answer(text="Hi! Nice to see you again")
         await CommonStates.to_main_menu.set()
         await send_user_to_main_menu(message, state)
     else:
@@ -62,16 +66,51 @@ async def cmd_start(message: types.Message, state: FSMContext):
         await QuizStates.wait_for_reply.set()
 
 
-async def cmd_help(message: types.Message, state: FSMContext):
+async def cmd_help(message: types.Message):
     """Function triggers on /help."""
 
     logger.info(msg=f"User {message.from_user.first_name}(@{message.from_user.username}) sent /help command.")
-    await state.finish()
+    await CommonStates.help.set()
     await message.answer(text="It’s an up-to-date Bot with a database of questions that were answered with competent "
                               "answers. You always can contact developer:\n"
                               "📩: l.rekhlov@innopolis.university\n"
                               "📩: s.kamalov@innopolis.university\n"
-                              "telegram: @RRMOLL\n", reply_markup=types.ReplyKeyboardRemove())
+                              "telegram: @RRMOLL\n", reply_markup=to_main_menu_kb)
+
+
+async def cmd_rules(message: types.Message):
+    """Function triggers on /rules."""
+
+    logger.info(msg=f"User {message.from_user.first_name}(@{message.from_user.username}) sent /rules command.")
+    await CommonStates.rules.set()
+    await message.answer(text=f"-How to use Q&A Bot?\n"
+                              f"-It's so easy in using\n\n"
+                              f"🤴🏼 Main rules for users:\n\n"
+                              f"1. If you want to find a question in data base:\n"
+                              f"    - You need to send #Hashtags, which describe your question 🙋 \n"
+                              f"    - After, you get some questions with the same #Hashtags \n"
+                              f"    - Next, you can flip questions over by ⬅️➡️\n\n"
+                              f"2. If you want to create your question:\n"
+                              f"    - You need to send the question\n"
+                              f"    - After, send all #Hashtags in one message\n"
+                              f"    - Next, you need only wait...\n\n"
+                              f"3. If you want to check your questions:\n"
+                              f"    - You need to press the 'Interaction' button\n"
+                              f"    - Next, press the 'My questions' button\n\n"
+                              f"4. If you want to request an anonymous chat about any question:\n"
+                              f"    - You need to choose question about which you want to request a chat\n"
+                              f"    - After, press the 'Show answer' and 'Request'\n\n"
+                              f"👨🏽‍💻 Additional rules for respondent:\n\n"
+                              f"1. If you want to check your answers:\n"
+                              f"    - You need to press the 'Interaction' button\n"
+                              f"    - Next, press the 'My answers' button\n\n"
+                              f"2. If you want to answer on available questions:\n"
+                              f"    - You need to press the 'Interaction' button\n"
+                              f"    - Next, press the 'Available questions' button\n\n"
+                              f"3. If you get request on anonymous chat:\n"
+                              f"    - You need to press the 'Interaction' button\n"
+                              f"    - Next, press the 'Requests' button\n",
+                         reply_markup=to_main_menu_kb)
 
 
 async def send_user_to_main_menu(message: types.Message, state: FSMContext):
@@ -149,7 +188,7 @@ async def show_questions(message: types.Message, state: FSMContext):
         showing_questions_keyboard.inline_keyboard = buttons
         await state.update_data(index=0, questions=questions, message=message, show_answer=False,
                                 request_sent=False)
-        await message.answer(text="Your questions 🧐:")
+        await message.answer(text="Your questions 🧐:", reply_markup=types.ReplyKeyboardRemove())
         await message.answer(text=f"Question:\n"
                                   f"{questions[0].text}\n\n"
                                   f"Answered: {is_answered_signs[questions[0].is_answered]}",
@@ -173,12 +212,17 @@ def register_common_handlers(dp: Dispatcher):
     logger.info(msg=f"Registering common handlers.")
     dp.register_message_handler(cmd_start, commands='start', state="*")
     dp.register_message_handler(cmd_help, commands='help', state='*')
+    dp.register_message_handler(cmd_rules, commands="rules", state='*')
     dp.register_message_handler(react_to_actions, state=CommonStates.react_to_actions)
     dp.register_message_handler(send_user_to_main_menu, state=CommonStates.to_main_menu)
     dp.register_message_handler(send_user_to_main_menu,
                                 Text(equals="Back to menu ↩️🥺"), state=RespondentStates.react_to_inters)
     dp.register_message_handler(send_user_to_main_menu,
                                 Text(equals="Back to menu ↩️🥺"), state=CommonUserStates.react_to_inters)
+    dp.register_message_handler(send_user_to_main_menu,
+                                Text(equals="Back to menu ↩️🥺"), state=CommonStates.rules)
+    dp.register_message_handler(send_user_to_main_menu,
+                                Text(equals="Back to menu ↩️🥺"), state=CommonStates.help)
     dp.register_message_handler(show_questions, Text(equals="My questions"),
                                 state=CommonUserStates.react_to_inters)
     dp.register_message_handler(show_questions, Text(equals="My questions"),

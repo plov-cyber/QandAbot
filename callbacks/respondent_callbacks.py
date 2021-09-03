@@ -39,6 +39,7 @@ async def respondent_swipe_available_questions(callback: types.CallbackQuery, st
         await state.update_data(question=questions[i])
         await callback.message.answer(text="Please write full and correct answer on given question:")
         await RespondentStates.give_answer.set()
+        return
     if size == 1:
         await callback.answer()
         return

@@ -64,29 +64,11 @@ async def respondent_send_actions(message: types.Message):
         types.KeyboardButton(text="Interaction")
     ]
     keyboard_for_respondent.add(*buttons)
-    await message.answer(text=f"-How to use Q&A Bot?\n"
-                              f"-It's so easy in using:\n\n"
-                              f"1. If you want to find a question in data base:\n"
-                              f"    - You need to send #Hashtags, which describe your question 🙋 \n"
-                              f"    - After, you get some questions with the same #Hashtags \n"
-                              f"    - Next, you can flip questions over by ⬅️➡️\n\n"
-                              f"2. If you want to create your question:\n"
-                              f"    - You need to send the question\n"
-                              f"    - After, send all #Hashtags in one message\n"
-                              f"    - Next, you need only wait...\n\n"
-                              f"3. If you want to check your questions:\n"
-                              f"    - You need to press the 'Interaction' button\n"
-                              f"    - Next, press the 'My questions' button\n\n"
-                              f"4. If you want to check your answers:\n"
-                              f"    - You need to press the 'Interaction' button\n"
-                              f"    - Next, press the 'My answers' button\n\n"
-                              f"5. If you want to answer on available questions:\n"
-                              f"    - You need to press the 'Interaction' button\n"
-                              f"    - Next, press the 'Available questions' button\n\n"
-                              f"6. If you get request on anonymous chat:\n"
-                              f"    - You need to press the 'Interaction' button\n"
-                              f"    - Next, press the 'Requests' button\n",
-                         parse_mode="HTML", reply_markup=keyboard_for_respondent)
+    await message.answer(text=f"Available commands for you:\n"
+                              f"/start - Restart bot\n"
+                              f"/help - About us\n"
+                              f"/rules - How to use bot",
+                         reply_markup=keyboard_for_respondent)
     await CommonStates.react_to_actions.set()
 
 
@@ -186,6 +168,7 @@ async def respondent_give_answer(message: types.Message, state: FSMContext):
 
     user_data = await state.get_data()
     question = user_data['question']
+    question = session.query(Question).get(question.id)
     logger.info(msg=f"Respondent {message.from_user.first_name}"
                     f"(@{message.from_user.username}) is giving answer on question \"{question.text}\".")
     answer_text = message.text
@@ -221,14 +204,14 @@ async def respondent_show_answers(message: types.Message, state: FSMContext):
                         f"{message.from_user.first_name}(@{message.from_user.username}) answers.")
         buttons = [
             [types.InlineKeyboardButton(text='⬅️', callback_data="previous_question"),
-             types.InlineKeyboardButton(text=f'1/{size}', callback_data="question_num"),
+             types.InlineKeyboardButton(text=f'1/{size} ', callback_data="question_num"),
              types.InlineKeyboardButton(text='➡️', callback_data="next_question")],
             [types.InlineKeyboardButton(text="Back to menu ↩️🥺", callback_data='go_back')]
         ]
         show_answers_keyboard = types.InlineKeyboardMarkup(row_width=3)
         show_answers_keyboard.inline_keyboard = buttons
         await state.update_data(index=0, answers=answers, message=message)
-        await message.answer(text="Your answers✍🏽")
+        await message.answer(text="Your answers✍🏽", reply_markup=types.ReplyKeyboardRemove())
         await message.answer(text=f"Question:\n"
                                   f"{answers[0].question.text}\n\n"
                                   f"Your answer:\n"
@@ -265,6 +248,7 @@ async def respondent_show_requests(message: types.Message, state: FSMContext):
         question = session.query(Question).get(requests[0].question_id)
         await state.update_data(index=0, requests=requests, message=message,
                                 made_action=False)
+        await message.answer(text="Your requests:", reply_markup=types.ReplyKeyboardRemove())
         await message.answer(text=f"Request for question:\n"
                                   f"\"{question.text}\"",
                              reply_markup=show_requests_keyboard)

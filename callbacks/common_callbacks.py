@@ -67,7 +67,7 @@ async def swipe_questions(callback: types.CallbackQuery, state: FSMContext):
             await callback.answer(text="You already sent request!")
             return
         request = Request(
-            from_user_id=questions[i].from_user_id,
+            from_user_id=message.from_user.id,
             to_user_id=answer.from_user_id,
             question_id=questions[i].id
         )
@@ -81,7 +81,8 @@ async def swipe_questions(callback: types.CallbackQuery, state: FSMContext):
                                            message_id=notification.message_id)
         await callback.answer(text="Your request sent successfully.")
     elif action == 'bad_answer':
-        pass
+        await callback.answer(text="Sorry, it doesn't work :(")
+        return
     buttons = [
         [types.InlineKeyboardButton(text='⬅️', callback_data="previous_question"),
          types.InlineKeyboardButton(text=f'{i + 1}/{size}', callback_data="question_num"),
@@ -92,7 +93,7 @@ async def swipe_questions(callback: types.CallbackQuery, state: FSMContext):
     elif questions[i].is_answered and show_answer:
         buttons.append([types.InlineKeyboardButton(text='Hide answer', callback_data="hide_answer")])
         buttons.append([types.InlineKeyboardButton(text="Bad answer", callback_data="bad_answer")])
-        if not request_sent and not request:
+        if not request_sent and not request and answer.from_user_id != message.from_user.id:
             buttons.append(
                 [types.InlineKeyboardButton(text='Request for anonymous chat', callback_data="send_request")])
     buttons.append([types.InlineKeyboardButton(text="Back to menu ↩️🥺", callback_data="go_back")])
